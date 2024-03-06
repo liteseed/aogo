@@ -5,7 +5,6 @@ import (
 	"errors"
 )
 
-
 func NewDataItem(data []byte) (*DataItem, error) {
 	dataItem := &DataItem{}
 	return dataItem, nil
@@ -25,7 +24,11 @@ func DecodeDataItem(data []byte) (*DataItem, error) {
 	signatureStart := 2
 	signatureEnd := signatureLength + signatureStart
 	signature := base64.URLEncoding.EncodeToString(data[signatureStart:signatureEnd])
-
+	idBytes, err := hash(data[signatureStart:signatureEnd])
+	if err != nil {
+		return nil, err
+	}
+	id := base64.URLEncoding.EncodeToString(idBytes)
 	ownerStart := signatureEnd
 	ownerEnd := ownerStart + publicKeyLength
 	owner := base64.URLEncoding.EncodeToString(data[ownerStart:ownerEnd])
@@ -33,14 +36,15 @@ func DecodeDataItem(data []byte) (*DataItem, error) {
 	position := 2 + ownerEnd
 	target, position := getTarget(&data, position)
 	anchor, position := getAnchor(&data, position)
-	tags, position, err := decodeTags(&data, position)
+	tags, _, err := decodeTags(&data, position)
 	if err != nil {
 		return nil, err
 	}
 
-	rawData := data[position:]
+	rawData := data
 
 	return &DataItem{
+		ID:            id,
 		SignatureType: signatureType,
 		Signature:     signature,
 		Owner:         owner,
@@ -52,6 +56,5 @@ func DecodeDataItem(data []byte) (*DataItem, error) {
 }
 
 func (d *DataItem) Sign() error {
-
 	return nil
 }

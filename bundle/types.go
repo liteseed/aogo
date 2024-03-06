@@ -42,20 +42,21 @@ type Tag struct {
 }
 
 type DataItem struct {
-	SignatureType int    `json:"signatureType"`
+	ID            string `json:"id"`
 	Signature     string `json:"signature"`
+	SignatureType int    `json:"signature_type"`
 	Owner         string `json:"owner"`  //  utils.Base64Encode(pubkey)
 	Target        string `json:"target"` // optional, if exist must length 32, and is base64 str
 	Anchor        string `json:"anchor"` // optional, if exist must length 32, and is base64 str
 	Tags          []Tag  `json:"tags"`
 	RawData       string `json:"data"`
-	Id            string `json:"id"`
 	TagsBy        string `json:"tagsBy"` // utils.Base64Encode(TagsBytes) for retry assemble item
 
 	ItemBinary []byte `json:"-"`
 }
 
 type Bundle struct {
+	Headers []Header   `json:"headers"`
 	Items   []DataItem `json:"items"`
-	RawData string
+	RawData string     `json:"raw_data"`
 }

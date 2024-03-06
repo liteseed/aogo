@@ -29,6 +29,30 @@ func DecodeBundle(data []byte) (*Bundle, error) {
 	return bundle, nil
 }
 
+func NewBundle(dataItems *[]DataItem) (*Bundle, error) {
+	bundle := &Bundle{}
+
+	headers, err := generateBundleHeader(dataItems)
+	if err != nil {
+		return nil, err
+	}
+	
+	bundle.Headers = *headers
+	bundle.Items = *dataItems
+	N := len(*dataItems)
+	
+	var sizeBytes []byte
+	var headersBytes []byte
+	var dataItemsBytes []byte 
+	for i := 0; i < N; i++ {
+		headersBytes = append(headersBytes, (*headers)[i].raw...)
+		dataItemsBytes = append(dataItemsBytes, (*headers)[i].raw...)
+	}
+
+	bundle.RawData = base64.URLEncoding.EncodeToString( append(sizeBytes, append(headersBytes, dataItemsBytes...)...))
+	return bundle, nil
+}
+
 func ValidateBundle(data []byte) (bool, error) {
 	// length must more than 32
 	if len(data) < 32 {
@@ -41,5 +65,3 @@ func ValidateBundle(data []byte) (bool, error) {
 	}
 	return len(data) == dataItemSize+32+64*N, nil
 }
-
-

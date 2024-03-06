@@ -1,6 +1,7 @@
 package bundle
 
 import (
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/binary"
 	"errors"
@@ -64,7 +65,6 @@ func decodeTags(data *[]byte, startAt int) (*[]Tag, int, error) {
 		if err != nil {
 			return nil, tagsEnd, err
 		}
-		println(tags)
 		tagsEnd = bytesDataEnd
 		return tags, tagsEnd, nil
 	}
@@ -100,18 +100,51 @@ func decodeAvro(data []byte) (*[]Tag, error) {
 	return &tags, err
 }
 
-type bundleHeader struct {
+type Header struct {
 	id   int
 	size int
+	raw  []byte
 }
 
-func decodeBundleHeader(data *[]byte) (*[]bundleHeader, int) {
-	N := int(binary.LittleEndian.Uint16((*data)[:32]))
-	headers := []bundleHeader{}
+func generateBundleHeader(d *[]DataItem) (*[]Header, error) {
+	headers := []Header{}
+
+	for _, dataItem := range *d {
+		idBytes, err := base64.URLEncoding.DecodeString(dataItem.ID)
+		if err != nil {
+			return nil, err
+		}
+		rawData, err := base64.URLEncoding.DecodeString(dataItem.RawData)
+		if err != nil {
+			return nil, err
+		}
+		id := int(binary.LittleEndian.Uint16(idBytes))
+		size := len(rawData)
+		raw := make([]byte, 64)
+		binary.LittleEndian.PutUint16(raw, uint16(size))
+		binary.LittleEndian.AppendUint16(raw, uint16(id))
+		headers = append(headers, Header{id: id, size: size, raw: raw})
+	}
+	return &headers, nil
+}
+
+func decodeBundleHeader(data *[]byte) (*[]Header, int) {
+	N := int(binary.LittleEndian.Uint32((*data)[:32]))
+	headers := []Header{}
 	for i := 32; i < 32+64*N; i += 64 {
 		size := int(binary.LittleEndian.Uint16((*data)[i : i+32]))
 		id := int(binary.LittleEndian.Uint16((*data)[i+32 : i+64]))
-		headers = append(headers, bundleHeader{id: id, size: size})
+		headers = append(headers, Header{id: id, size: size})
 	}
 	return &headers, N
+}
+
+func hash(data []byte) ([]byte, error) {
+	h := sha256.New()
+	_, err := h.Write(data)
+	if err != nil {
+		return nil, err
+	}
+	r := h.Sum(nil)
+	return r, nil
 }
