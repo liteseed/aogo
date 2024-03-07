@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"log"
 	"reflect"
 
 	"github.com/linkedin/goavro/v2"
@@ -148,12 +149,9 @@ func generateBundleHeader(d *[]DataItem) (*[]Header, error) {
 		if err != nil {
 			return nil, err
 		}
-		rawData, err := base64.URLEncoding.DecodeString(dataItem.Data)
-		if err != nil {
-			return nil, err
-		}
+
 		id := int(binary.LittleEndian.Uint16(idBytes))
-		size := len(rawData)
+		size := len(dataItem.Raw)
 		raw := make([]byte, 64)
 		binary.LittleEndian.PutUint16(raw, uint16(size))
 		binary.LittleEndian.AppendUint16(raw, uint16(id))
@@ -186,27 +184,41 @@ func hash(data []byte) ([]byte, error) {
 func typeof(v interface{}) string {
 	return reflect.TypeOf(v).String()
 }
+
+func unpackArray(s any) []any {
+	v := reflect.ValueOf(s)
+	r := make([]any, v.Len())
+	for i := 0; i < v.Len(); i++ {
+		r[i] = v.Index(i).Interface()
+	}
+	return r
+}
+
 func DeepHash(data any) [48]byte {
 	if typeof(data) == "[]uint8" {
 		tag := append([]byte("blob"), []byte(fmt.Sprintf("%d", len(data.([]byte))))...)
 		tagHashed := sha512.Sum384(tag)
-		return tagHashed
+		dataHashed := sha512.Sum384(data.([]byte))
+		r := append(tagHashed[:], dataHashed[:]...)
+		rHashed := sha512.Sum384(r)
+		return rHashed
 	} else {
-		tag := append([]byte("list"), []byte(fmt.Sprintf("%d", len(data.([]interface{}))))...)
+		_data := unpackArray(data)
+		tag := append([]byte("list"), []byte(fmt.Sprintf("%d", len(_data)))...)
 		tagHashed := sha512.Sum384(tag)
-		return deepHashChunk(data.([]interface{}), tagHashed)
+		return deepHashChunk(_data, tagHashed)
 	}
 }
-func deepHashChunk(data []interface{}, acc [48]byte) [48]byte {
+func deepHashChunk(data []any, acc [48]byte) [48]byte {
 	if len(data) < 1 {
 		return acc
 	}
 	var dHash [48]byte
+	log.Println(typeof(data[0]))
 	if typeof(data[0]) == "[]uint8" {
 		dHash = DeepHash(data[0].([]byte))
 	} else {
-		dHash = DeepHash(data[0].([]interface{}))
-
+		dHash = DeepHash(data[0].(interface{}))
 	}
 	hashPair := append(acc[:], dHash[:]...)
 	newAcc := sha512.Sum384(hashPair)

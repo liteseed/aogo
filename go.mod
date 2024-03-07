@@ -4,7 +4,7 @@ go 1.21.7
 
 require (
 	github.com/everFinance/goar v1.6.0
-	github.com/hamba/avro v1.8.0
+	github.com/linkedin/goavro/v2 v2.12.0
 	gotest.tools/v3 v3.5.1
 )
 
@@ -21,11 +21,11 @@ require (
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
+	github.com/hamba/avro v1.8.0 // indirect
 	github.com/inconshreveable/log15 v0.0.0-20201112154412-8562bdadbbac // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.4 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/linkedin/goavro/v2 v2.12.0 // indirect
 	github.com/mattn/go-colorable v0.1.11 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
