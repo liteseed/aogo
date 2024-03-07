@@ -7,7 +7,6 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"log"
 	"reflect"
 
 	"github.com/linkedin/goavro/v2"
@@ -213,13 +212,7 @@ func deepHashChunk(data []any, acc [48]byte) [48]byte {
 	if len(data) < 1 {
 		return acc
 	}
-	var dHash [48]byte
-	log.Println(typeof(data[0]))
-	if typeof(data[0]) == "[]uint8" {
-		dHash = DeepHash(data[0].([]byte))
-	} else {
-		dHash = DeepHash(data[0].(interface{}))
-	}
+	dHash := DeepHash(data[0])
 	hashPair := append(acc[:], dHash[:]...)
 	newAcc := sha512.Sum384(hashPair)
 	return deepHashChunk(data[1:], newAcc)
