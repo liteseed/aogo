@@ -3,6 +3,7 @@ package bundle
 import (
 	"encoding/base64"
 	"errors"
+
 )
 
 func DecodeBundle(data []byte) (*Bundle, error) {
@@ -36,20 +37,21 @@ func NewBundle(dataItems *[]DataItem) (*Bundle, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	bundle.Headers = *headers
 	bundle.Items = *dataItems
 	N := len(*dataItems)
-	
+
 	var sizeBytes []byte
 	var headersBytes []byte
-	var dataItemsBytes []byte 
+	var dataItemsBytes []byte
+
 	for i := 0; i < N; i++ {
 		headersBytes = append(headersBytes, (*headers)[i].raw...)
 		dataItemsBytes = append(dataItemsBytes, (*headers)[i].raw...)
 	}
 
-	bundle.RawData = base64.URLEncoding.EncodeToString( append(sizeBytes, append(headersBytes, dataItemsBytes...)...))
+	bundle.RawData = base64.URLEncoding.EncodeToString(append(sizeBytes, append(headersBytes, dataItemsBytes...)...))
 	return bundle, nil
 }
 
@@ -65,3 +67,4 @@ func ValidateBundle(data []byte) (bool, error) {
 	}
 	return len(data) == dataItemSize+32+64*N, nil
 }
+

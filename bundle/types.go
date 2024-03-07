@@ -50,9 +50,6 @@ type DataItem struct {
 	Anchor        string `json:"anchor"` // optional, if exist must length 32, and is base64 str
 	Tags          []Tag  `json:"tags"`
 	RawData       string `json:"data"`
-	TagsBy        string `json:"tagsBy"` // utils.Base64Encode(TagsBytes) for retry assemble item
-
-	ItemBinary []byte `json:"-"`
 }
 
 type Bundle struct {

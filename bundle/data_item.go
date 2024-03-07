@@ -3,11 +3,34 @@ package bundle
 import (
 	"encoding/base64"
 	"errors"
+	"log"
+
+	"github.com/liteseed/argo/signer"
 )
 
-func NewDataItem(data []byte) (*DataItem, error) {
-	dataItem := &DataItem{}
-	return dataItem, nil
+// Create a Data Item
+func NewDataItem(data []byte, s signer.Signer, target string, anchor string, tags []Tag) (*DataItem, error) {
+
+	targetBytes := []byte(target)
+	anchorBytes := []byte(anchor)
+	tagsBytes, err := encodeTags(&tags)
+
+	if err != nil {
+		return nil, err
+	}
+
+	print(targetBytes, anchorBytes, tagsBytes)
+	rawData := []byte{uint8(1)}
+	log.Println(rawData)
+
+	return &DataItem{
+		SignatureType: 1,
+		Owner:         s.S.Owner(),
+		Target:        target,
+		Anchor:        anchor,
+		Tags:          tags,
+		RawData:       base64.URLEncoding.EncodeToString(rawData),
+	}, nil
 }
 
 // Decode a DataItem from bytes
@@ -41,8 +64,6 @@ func DecodeDataItem(data []byte) (*DataItem, error) {
 		return nil, err
 	}
 
-	rawData := data
-
 	return &DataItem{
 		ID:            id,
 		SignatureType: signatureType,
@@ -51,10 +72,6 @@ func DecodeDataItem(data []byte) (*DataItem, error) {
 		Target:        target,
 		Anchor:        anchor,
 		Tags:          *tags,
-		RawData:       base64.URLEncoding.EncodeToString(rawData),
+		RawData:       base64.URLEncoding.EncodeToString(data),
 	}, nil
-}
-
-func (d *DataItem) Sign() error {
-	return nil
 }

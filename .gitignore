@@ -4,3 +4,8 @@
 dist
 data
 temp
+
+arweave.json
+wallet.json
+keyfile.json
+bundle-keyfile.json

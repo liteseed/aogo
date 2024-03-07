@@ -7,8 +7,21 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/hamba/avro"
+	"github.com/linkedin/goavro/v2"
 )
+
+const avroTagSchema = `
+{
+	"type": "array",
+	"items": {
+		"type": "record",
+		"name": "Tag",
+		"fields": [
+			{ "name": "name", "type": "bytes" },
+			{ "name": "value", "type": "bytes" }
+		]
+	}
+}`
 
 func getSignatureMetadata(data []byte, N int) (SignatureType int, SignatureLength int, PublicKeyLength int, err error) {
 	SignatureType = int(binary.LittleEndian.Uint16(data))
@@ -72,32 +85,51 @@ func decodeTags(data *[]byte, startAt int) (*[]Tag, int, error) {
 }
 
 func decodeAvro(data []byte) (*[]Tag, error) {
-	codec, err := avro.Parse(`
-	{
-		"type": "array",
-		"items": {
-			"type": "record",
-			"name": "Tag",
-			"fields": [
-				{ "name": "name", "type": "bytes" },
-				{ "name": "value", "type": "bytes" }
-			]
-		}
-	}`)
-	if err != nil {
-		panic(err)
-	}
-	avroTags := &[]map[string]any{}
-	err = avro.Unmarshal(codec, data, avroTags)
+	codec, err := goavro.NewCodec(avroTagSchema)
 	if err != nil {
 		return nil, err
 	}
 
-	tags := []Tag{}
-	for _, v := range *avroTags {
-		tags = append(tags, Tag{Name: string(v["name"].([]byte)), Value: string(v["value"].([]byte))})
+	avroTags, _, err := codec.NativeFromBinary(data)
+	if err != nil {
+		return nil, err
 	}
-	return &tags, err
+
+	tags := &[]Tag{}
+
+	for _, v := range avroTags.([]interface{}) {
+		tag := v.(map[string]any)
+		*tags = append(*tags, Tag{Name: string(tag["name"].([]byte)), Value: string(tag["value"].([]byte))})
+	}
+	return tags, err
+}
+
+func encodeTags(tags *[]Tag) ([]byte, error) {
+	data, err := encodeAvro(tags)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+func encodeAvro(tags *[]Tag) ([]byte, error) {
+	codec, err := goavro.NewCodec(avroTagSchema)
+	if err != nil {
+		return nil, err
+	}
+
+	avroTags := []map[string]any{}
+
+	for _, tag := range *tags {
+		m := map[string]any{"name": []byte(tag.Name), "value": []byte(tag.Value)}
+		avroTags = append(avroTags, m)
+	}
+	data, err := codec.BinaryFromNative(nil, avroTags)
+	if err != nil {
+		return nil, err
+	}
+
+	return data, err
 }
 
 type Header struct {
