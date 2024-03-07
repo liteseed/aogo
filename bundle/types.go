@@ -49,7 +49,8 @@ type DataItem struct {
 	Target        string `json:"target"` // optional, if exist must length 32, and is base64 str
 	Anchor        string `json:"anchor"` // optional, if exist must length 32, and is base64 str
 	Tags          []Tag  `json:"tags"`
-	RawData       string `json:"data"`
+	Data          string `json:"data"`
+	Raw           []byte
 }
 
 type Bundle struct {

@@ -2,10 +2,12 @@ package bundle
 
 import (
 	"crypto/sha256"
+	"crypto/sha512"
 	"encoding/base64"
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"reflect"
 
 	"github.com/linkedin/goavro/v2"
 )
@@ -146,7 +148,7 @@ func generateBundleHeader(d *[]DataItem) (*[]Header, error) {
 		if err != nil {
 			return nil, err
 		}
-		rawData, err := base64.URLEncoding.DecodeString(dataItem.RawData)
+		rawData, err := base64.URLEncoding.DecodeString(dataItem.Data)
 		if err != nil {
 			return nil, err
 		}
@@ -179,4 +181,34 @@ func hash(data []byte) ([]byte, error) {
 	}
 	r := h.Sum(nil)
 	return r, nil
+}
+
+func typeof(v interface{}) string {
+	return reflect.TypeOf(v).String()
+}
+func DeepHash(data any) [48]byte {
+	if typeof(data) == "[]uint8" {
+		tag := append([]byte("blob"), []byte(fmt.Sprintf("%d", len(data.([]byte))))...)
+		tagHashed := sha512.Sum384(tag)
+		return tagHashed
+	} else {
+		tag := append([]byte("list"), []byte(fmt.Sprintf("%d", len(data.([]interface{}))))...)
+		tagHashed := sha512.Sum384(tag)
+		return deepHashChunk(data.([]interface{}), tagHashed)
+	}
+}
+func deepHashChunk(data []interface{}, acc [48]byte) [48]byte {
+	if len(data) < 1 {
+		return acc
+	}
+	var dHash [48]byte
+	if typeof(data[0]) == "[]uint8" {
+		dHash = DeepHash(data[0].([]byte))
+	} else {
+		dHash = DeepHash(data[0].([]interface{}))
+
+	}
+	hashPair := append(acc[:], dHash[:]...)
+	newAcc := sha512.Sum384(hashPair)
+	return deepHashChunk(data[1:], newAcc)
 }
