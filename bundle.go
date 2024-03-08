@@ -1,9 +1,8 @@
-package bundle
+package argo
 
 import (
 	"encoding/base64"
 	"errors"
-
 )
 
 func DecodeBundle(data []byte) (*Bundle, error) {

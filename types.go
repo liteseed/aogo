@@ -1,4 +1,4 @@
-package bundle
+package argo
 
 const (
 	Arweave  = 1

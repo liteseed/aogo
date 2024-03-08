@@ -1,4 +1,4 @@
-package bundle
+package argo
 
 import (
 	"crypto/sha256"
