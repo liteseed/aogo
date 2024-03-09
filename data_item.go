@@ -4,13 +4,16 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"errors"
-
 )
 
 // Create a Data Item
 func NewDataItem(rawData []byte, s Signer, target string, anchor string, tags []Tag) (*DataItem, error) {
-	rawOwner := s.S.PubKey.N.Bytes()
-	rawTarget := []byte(target)
+
+	rawOwner := []byte(s.S.PubKey.N.Bytes())
+	rawTarget, err := base64.RawURLEncoding.DecodeString(target)
+	if err != nil {
+		return nil, err
+	}
 	rawAnchor := []byte(anchor)
 
 	tagsBytes, err := encodeTags(&tags)
@@ -19,35 +22,64 @@ func NewDataItem(rawData []byte, s Signer, target string, anchor string, tags []
 	}
 
 	chunks := []interface{}{
-		[]byte(base64.URLEncoding.EncodeToString([]byte("dataitem"))),
-		[]byte(base64.URLEncoding.EncodeToString([]byte("1"))),
-		[]byte(base64.URLEncoding.EncodeToString(rawOwner)),
-		[]byte(base64.URLEncoding.EncodeToString(tagsBytes)),
-		[]byte(base64.URLEncoding.EncodeToString(rawAnchor)),
-		[]byte(base64.URLEncoding.EncodeToString(tagsBytes)),
-		[]byte(base64.URLEncoding.EncodeToString(rawData)),
+		[]byte("dataitem"),
+		[]byte("1"),
+		[]byte("1"),
+		rawOwner,
+		rawTarget,
+		rawAnchor,
+		tagsBytes,
+		rawData,
 	}
-	signature := DeepHash(chunks)
+	signatureData := DeepHash(chunks)
 
-	rawSignature := []byte(signature[:])
-
-	raw := make([]byte, 2)
-	binary.LittleEndian.PutUint16(raw, uint16(1))
+	rawSignature, err := s.S.SignMsg(signatureData[:])
+	if err != nil {
+		return nil, err
+	}
+	raw := make([]byte, 0)
+	raw = binary.LittleEndian.AppendUint16(raw, uint16(1))
 	raw = append(raw, rawSignature...)
 	raw = append(raw, rawOwner...)
+
+	if target == "" {
+		raw = append(raw, 0)
+	} else {
+		raw = append(raw, 1)
+	}
 	raw = append(raw, rawTarget...)
+
+	if anchor == "" {
+		raw = append(raw, 0)
+	} else {
+		raw = append(raw, 1)
+	}
 	raw = append(raw, rawAnchor...)
+
+	numberOfTags := make([]byte, 8)
+	binary.LittleEndian.PutUint16(numberOfTags, uint16(len(tags)))
+	raw = append(raw, numberOfTags...)
+
+	tagsLength := make([]byte, 8)
+	binary.LittleEndian.PutUint16(tagsLength, uint16(len(tagsBytes)))
+	raw = append(raw, tagsLength...)
 	raw = append(raw, tagsBytes...)
+
 	raw = append(raw, rawData...)
 
+	rawID, err := hash(rawSignature)
+	if err != nil {
+		return nil, err
+	}
 	return &DataItem{
 		SignatureType: 1,
-		Signature:     base64.URLEncoding.EncodeToString(rawSignature),
-		Owner:         base64.URLEncoding.EncodeToString(rawOwner),
-		Target:        base64.URLEncoding.EncodeToString(rawTarget),
-		Anchor:        base64.URLEncoding.EncodeToString(rawAnchor),
+		Signature:     base64.RawURLEncoding.EncodeToString(rawSignature),
+		ID:            base64.RawURLEncoding.EncodeToString(rawID),
+		Owner:         s.S.Owner(),
+		Target:        target,
+		Anchor:        anchor,
 		Tags:          tags,
-		Data:          base64.URLEncoding.EncodeToString(rawData),
+		Data:          string(rawData),
 		Raw:           raw,
 	}, nil
 }
@@ -59,30 +91,32 @@ func DecodeDataItem(raw []byte) (*DataItem, error) {
 		return nil, errors.New("binary too small")
 	}
 
-	signatureType, signatureLength, publicKeyLength, err := getSignatureMetadata(raw[:2], N)
+	signatureType, signatureLength, publicKeyLength, err := getSignatureMetadata(raw[:2])
 	if err != nil {
 		return nil, err
 	}
+
 	signatureStart := 2
 	signatureEnd := signatureLength + signatureStart
-	signature := base64.URLEncoding.EncodeToString(raw[signatureStart:signatureEnd])
-	idBytes, err := hash(raw[signatureStart:signatureEnd])
+	signature := base64.RawURLEncoding.EncodeToString(raw[signatureStart:signatureEnd])
+	rawId, err := hash(raw[signatureStart:signatureEnd])
 	if err != nil {
 		return nil, err
 	}
-	id := base64.URLEncoding.EncodeToString(idBytes)
+	id := base64.RawURLEncoding.EncodeToString(rawId)
 	ownerStart := signatureEnd
 	ownerEnd := ownerStart + publicKeyLength
-	owner := base64.URLEncoding.EncodeToString(raw[ownerStart:ownerEnd])
+	owner := base64.RawURLEncoding.EncodeToString(raw[ownerStart:ownerEnd])
 
-	position := 2 + ownerEnd
+	position := ownerEnd
 	target, position := getTarget(&raw, position)
 	anchor, position := getAnchor(&raw, position)
 	tags, position, err := decodeTags(&raw, position)
 	if err != nil {
 		return nil, err
 	}
-	data := raw[position:]
+	data := base64.RawURLEncoding.EncodeToString(raw[position:])
+
 	return &DataItem{
 		ID:            id,
 		SignatureType: signatureType,
@@ -91,7 +125,7 @@ func DecodeDataItem(raw []byte) (*DataItem, error) {
 		Target:        target,
 		Anchor:        anchor,
 		Tags:          *tags,
-		Data:          base64.URLEncoding.EncodeToString(data),
+		Data:          data,
 		Raw:           raw,
 	}, nil
 }

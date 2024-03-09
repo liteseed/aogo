@@ -4,37 +4,17 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"log"
 	"net/http"
 )
 
 const (
 	MU_URL    = "https://mu.ao-testnet.xyz"
 	CU_URL    = "https://cu.ao-testnet.xyz"
+	SU_URL    = "https://g8way.io/1SafZGlZT4TLI8xoc0QEQ4MylHhuyQUblxD8xLKvEKI"
 	GATEWAY   = "https://arweave.net"
 	AO_MODULE = ""
 )
-
-func SendMessage(process string, data string, tags []Tag, anchor string, s *Signer) (string, error) {
-	dataItem, err := NewDataItem([]byte(data), *s, process, anchor, tags)
-	if err != nil {
-		return "", err
-	}
-	resp, err := http.Post(MU_URL+"/monitor/"+process, "application/octet-stream", bytes.NewBuffer(dataItem.Raw))
-	if err != nil {
-		return "", err
-	}
-	res, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-
-	var messageId string
-	err = json.Unmarshal(res, &messageId)
-	if err != nil {
-		return "", err
-	}
-	return messageId, nil
-}
 
 type ReadResultResponse struct {
 	Messages []map[string]interface{} `json:"Messages"`
@@ -54,11 +34,10 @@ type CU struct {
 }
 
 func NewCU(URL string) CU {
-	cu := CU{
+	return CU{
 		client: http.DefaultClient,
 		url:    URL,
 	}
-	return cu
 }
 
 func (cu *CU) ReadResult(process string, message string) (*ReadResultResponse, error) {
@@ -80,4 +59,41 @@ func (cu *CU) ReadResult(process string, message string) (*ReadResultResponse, e
 
 func SpawnProcess() {
 
+}
+
+type IMU interface {
+	SendMessage(process string, data string, tags []Tag, anchor string, s *Signer) (string, error)
+}
+type MU struct {
+	client *http.Client
+	url    string
+}
+
+func NewMU(URL string) MU {
+	return MU{
+		client: http.DefaultClient,
+		url:    URL,
+	}
+}
+
+func (mu MU) SendMessage(process string, data string, tags []Tag, anchor string, s *Signer) (string, error) {
+	tags = append(tags, Tag{Name: "Data-Protocol", Value: "ao"})
+	tags = append(tags, Tag{Name: "Variant", Value: "ao.TN.1"})
+	tags = append(tags, Tag{Name: "Type", Value: "Message"})
+	tags = append(tags, Tag{Name: "SDK", Value: "argo"})
+	dataItem, err := NewDataItem([]byte(data), *s, process, anchor, tags)
+	if err != nil {
+		return "", err
+	}
+	resp, err := mu.client.Post(mu.url, "application/octet-stream", bytes.NewBuffer(dataItem.Raw))
+	if err != nil {
+		return "", err
+	}
+	log.Println(resp.Status)
+	log.Println(err)
+	_, err = io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	return dataItem.ID, nil
 }

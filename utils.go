@@ -5,7 +5,6 @@ import (
 	"crypto/sha512"
 	"encoding/base64"
 	"encoding/binary"
-	"errors"
 	"fmt"
 	"reflect"
 
@@ -25,14 +24,11 @@ const avroTagSchema = `
 	}
 }`
 
-func getSignatureMetadata(data []byte, N int) (SignatureType int, SignatureLength int, PublicKeyLength int, err error) {
+func getSignatureMetadata(data []byte) (SignatureType int, SignatureLength int, PublicKeyLength int, err error) {
 	SignatureType = int(binary.LittleEndian.Uint16(data))
 	signatureMeta, ok := SignatureConfig[SignatureType]
 	if !ok {
 		return -1, -1, -1, fmt.Errorf("unsupported signature type:%d", SignatureType)
-	}
-	if N < signatureMeta.SignatureLength+2 {
-		return -1, -1, -1, errors.New("dataItem longer than expected signature length")
 	}
 	SignatureLength = signatureMeta.SignatureLength
 	PublicKeyLength = signatureMeta.PublicKeyLength
@@ -40,30 +36,27 @@ func getSignatureMetadata(data []byte, N int) (SignatureType int, SignatureLengt
 	return
 }
 
-func getTarget(data *[]byte, startAt int) (string, int) {
+func getTarget(data *[]byte, position int) (string, int) {
 	target := ""
-	position := startAt
-	if (*data)[startAt] == 1 {
-		target = base64.URLEncoding.EncodeToString((*data)[startAt+1 : startAt+1+32])
+	if (*data)[position] == 1 {
+		target = base64.RawURLEncoding.EncodeToString((*data)[position+1 : position+1+32])
 		position += 32
 	}
-	return target, position
+	return target, position + 1
 }
 
-func getAnchor(data *[]byte, startAt int) (string, int) {
+func getAnchor(data *[]byte, position int) (string, int) {
 	anchor := ""
-	position := startAt
-	if (*data)[startAt] == 1 {
-		anchor = base64.URLEncoding.EncodeToString((*data)[position+1 : position+1+32])
+	if (*data)[position] == 1 {
+		anchor = string((*data)[position+1 : position+1+32])
 		position += 32
 	}
-	return anchor, position
+	return anchor, position + 1
 }
 
 func decodeTags(data *[]byte, startAt int) (*[]Tag, int, error) {
 	tags := &[]Tag{}
 	tagsEnd := startAt + 8
-
 	numberOfTags := int(binary.LittleEndian.Uint16((*data)[startAt : startAt+8]))
 
 	if numberOfTags > 0 {
@@ -111,6 +104,7 @@ func encodeTags(tags *[]Tag) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return data, nil
 }
 
@@ -144,7 +138,7 @@ func generateBundleHeader(d *[]DataItem) (*[]Header, error) {
 	headers := []Header{}
 
 	for _, dataItem := range *d {
-		idBytes, err := base64.URLEncoding.DecodeString(dataItem.ID)
+		idBytes, err := base64.RawURLEncoding.DecodeString(dataItem.ID)
 		if err != nil {
 			return nil, err
 		}

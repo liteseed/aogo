@@ -41,9 +41,9 @@ func TestEncodeAvro(t *testing.T) {
 		{Name: "App-Version", Value: "1.21.0"},
 	}
 
-	tagsBytes, err := encodeAvro(&tags)
+	rawTags, err := encodeAvro(&tags)
 	assert.NilError(t, err)
-	assert.DeepEqual(t, data, tagsBytes)
+	assert.DeepEqual(t, data, rawTags)
 }
 
 func TestDecodeAvro(t *testing.T) {
