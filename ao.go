@@ -37,15 +37,32 @@ func SendMessage(process string, data string, tags []Tag, anchor string, s *Sign
 }
 
 type ReadResultResponse struct {
-	Messages []any
-	Spawns   []any
-	Outputs  []any
-	Errors   any
-	GasUsed  int
+	Messages []map[string]interface{} `json:"Messages"`
+	Spawns   []any                    `json:"Spawns"`
+	Outputs  []any                    `json:"Outputs"`
+	Errors   any                      `json:"Errors"`
+	GasUsed  int                      `json:"GasUsed"`
 }
 
-func ReadResult(process string, message string) (*ReadResultResponse, error) {
-	resp, err := http.Get(MU_URL + "/result/" + message + "?process-id=" + process)
+type ICU interface {
+	ReadResult(process string, message string) (*ReadResultResponse, error)
+}
+
+type CU struct {
+	client *http.Client
+	url    string
+}
+
+func NewCU(URL string) CU {
+	cu := CU{
+		client: http.DefaultClient,
+		url:    URL,
+	}
+	return cu
+}
+
+func (cu *CU) ReadResult(process string, message string) (*ReadResultResponse, error) {
+	resp, err := cu.client.Get(cu.url + "/result/" + message + "?process-id=" + process)
 	if err != nil {
 		return nil, err
 	}
@@ -53,13 +70,12 @@ func ReadResult(process string, message string) (*ReadResultResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	var readResult *ReadResultResponse
-	err = json.Unmarshal(res, readResult)
+	var readResult ReadResultResponse
+	err = json.Unmarshal(res, &readResult)
 	if err != nil {
 		return nil, err
 	}
-	return readResult, nil
+	return &readResult, nil
 }
 
 func SpawnProcess() {
