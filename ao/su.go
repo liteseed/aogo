@@ -1,5 +1,2 @@
 package ao
 
-func SpawnProcess() {
-
-}
