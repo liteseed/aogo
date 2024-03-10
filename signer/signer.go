@@ -1,4 +1,4 @@
-package argo
+package signer
 
 import "github.com/everFinance/goar"
 
@@ -6,7 +6,7 @@ type Signer struct {
 	S *goar.Signer
 }
 
-func NewSigner(path string) (*Signer, error) {
+func New(path string) (*Signer, error) {
 	s := &Signer{}
 	goarSigner, err := goar.NewSignerFromPath(path)
 	if err != nil {

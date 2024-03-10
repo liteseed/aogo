@@ -1,4 +1,4 @@
-package argo
+package transaction
 
 import (
 	"encoding/base64"
@@ -6,11 +6,12 @@ import (
 	"os"
 	"testing"
 
+	"github.com/liteseed/argo/signer"
 	"gotest.tools/v3/assert"
 )
 
 func TestDecodeDataItem(t *testing.T) {
-	data, err := os.ReadFile("./test/stubs/1115BDataItem")
+	data, err := os.ReadFile("../test/stubs/1115BDataItem")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -42,7 +43,7 @@ func TestNewDataItem(t *testing.T) {
 	anchor := "thisSentenceIs32BytesLongTrustMe"
 	target := "OXcT1sVRSA5eGwt2k6Yuz8-3e3g9WJi5uSE99CWqsBs"
 
-	s, err := NewSigner("./data/wallet.json")
+	s, err := signer.New("../data/wallet.json")
 	assert.NilError(t, err)
 	argoDataItem, err := NewDataItem([]byte(data), *s, target, anchor, tags)
 	assert.NilError(t, err)

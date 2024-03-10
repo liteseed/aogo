@@ -1,4 +1,4 @@
-package argo
+package ao
 
 import (
 	"encoding/json"
@@ -9,27 +9,6 @@ import (
 
 	"gotest.tools/v3/assert"
 )
-
-func TestSpawnProcess(t *testing.T) {
-
-}
-
-func TestSendMessage(t *testing.T) {
-
-	process := "yugMfaR-u_11GkAuZhqeChPuzoxVYuJW8RnNCIby-D8"
-	data := ""
-	tags := []Tag{{Name: "Action", Value: "Stakers"}}
-	s, err := NewSigner("./data/wallet.json")
-	assert.NilError(t, err)
-
-	ts := httptest.NewServer(nil)
-	defer ts.Close()
-
-	mu := NewMU(ts.URL)
-	res, err := mu.SendMessage(process, data, tags, "", s)
-	assert.NilError(t, err)
-	assert.Check(t, res != "", true)
-}
 
 func TestReadResult(t *testing.T) {
 	process := "W7Ax6G1i3C4ksRRNP4Urxvq9bcSmwBK9J0S3QBt9J70"

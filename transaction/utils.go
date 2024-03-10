@@ -1,4 +1,4 @@
-package argo
+package transaction
 
 import (
 	"crypto/sha256"
@@ -128,14 +128,8 @@ func encodeAvro(tags *[]Tag) ([]byte, error) {
 	return data, err
 }
 
-type Header struct {
-	id   int
-	size int
-	raw  []byte
-}
-
-func generateBundleHeader(d *[]DataItem) (*[]Header, error) {
-	headers := []Header{}
+func generateBundleHeader(d *[]DataItem) (*[]BundleHeader, error) {
+	headers := []BundleHeader{}
 
 	for _, dataItem := range *d {
 		idBytes, err := base64.RawURLEncoding.DecodeString(dataItem.ID)
@@ -148,18 +142,18 @@ func generateBundleHeader(d *[]DataItem) (*[]Header, error) {
 		raw := make([]byte, 64)
 		binary.LittleEndian.PutUint16(raw, uint16(size))
 		binary.LittleEndian.AppendUint16(raw, uint16(id))
-		headers = append(headers, Header{id: id, size: size, raw: raw})
+		headers = append(headers, BundleHeader{id: id, size: size, raw: raw})
 	}
 	return &headers, nil
 }
 
-func decodeBundleHeader(data *[]byte) (*[]Header, int) {
+func decodeBundleHeader(data *[]byte) (*[]BundleHeader, int) {
 	N := int(binary.LittleEndian.Uint32((*data)[:32]))
-	headers := []Header{}
+	headers := []BundleHeader{}
 	for i := 32; i < 32+64*N; i += 64 {
 		size := int(binary.LittleEndian.Uint16((*data)[i : i+32]))
 		id := int(binary.LittleEndian.Uint16((*data)[i+32 : i+64]))
-		headers = append(headers, Header{id: id, size: size})
+		headers = append(headers, BundleHeader{id: id, size: size})
 	}
 	return &headers, N
 }

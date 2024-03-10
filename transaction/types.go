@@ -1,5 +1,4 @@
-package argo
-
+package transaction
 const (
 	Arweave  = 1
 	ED25519  = 2
@@ -35,7 +34,6 @@ var SignatureConfig = map[int]SignatureMeta{
 		Name:            "solana",
 	},
 }
-
 type Tag struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
@@ -53,8 +51,14 @@ type DataItem struct {
 	Raw           []byte
 }
 
+type BundleHeader struct {
+	id   int
+	size int
+	raw  []byte
+}
+
 type Bundle struct {
-	Headers []Header   `json:"headers"`
-	Items   []DataItem `json:"items"`
-	RawData string     `json:"raw_data"`
+	Headers []BundleHeader `json:"bundle_header"`
+	Items   []DataItem     `json:"items"`
+	RawData string         `json:"raw_data"`
 }

@@ -1,13 +1,14 @@
-package argo
+package transaction
 
 import (
 	"encoding/base64"
 	"encoding/binary"
 	"errors"
+
+	"github.com/liteseed/argo/signer"
 )
 
-// Create a Data Item
-func NewDataItem(rawData []byte, s Signer, target string, anchor string, tags []Tag) (*DataItem, error) {
+func NewDataItem(rawData []byte, s signer.Signer, target string, anchor string, tags []Tag) (*DataItem, error) {
 
 	rawOwner := []byte(s.S.PubKey.N.Bytes())
 	rawTarget, err := base64.RawURLEncoding.DecodeString(target)
