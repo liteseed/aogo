@@ -17,10 +17,10 @@ type CU struct {
 	url    string
 }
 
-func NewCU(URL string) CU {
+func NewCU() CU {
 	return CU{
 		client: http.DefaultClient,
-		url:    URL,
+		url:    CU_URL,
 	}
 }
 

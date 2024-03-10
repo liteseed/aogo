@@ -10,6 +10,12 @@ import (
 	"gotest.tools/v3/assert"
 )
 
+func NewCUMock(URL string) CU {
+	return CU{
+		client: http.DefaultClient,
+		url:    URL,
+	}
+}
 func TestReadResult(t *testing.T) {
 	process := "W7Ax6G1i3C4ksRRNP4Urxvq9bcSmwBK9J0S3QBt9J70"
 	message := "ahcFiWM5RMcXDA-OrAdpjK10Afty6qxvELa83mMbxI0"
@@ -56,7 +62,7 @@ func TestReadResult(t *testing.T) {
 	ts := httptest.NewServer(nil)
 	defer ts.Close()
 
-	cu := NewCU(ts.URL)
+	cu := NewCUMock(ts.URL)
 
 	res, err := cu.ReadResult(process, message)
 	assert.NilError(t, err)

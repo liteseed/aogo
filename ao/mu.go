@@ -18,10 +18,10 @@ type MU struct {
 	url    string
 }
 
-func NewMU(URL string) MU {
+func NewMU() MU {
 	return MU{
 		client: http.DefaultClient,
-		url:    URL,
+		url:    MU_URL,
 	}
 }
 

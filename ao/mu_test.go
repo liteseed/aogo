@@ -3,12 +3,20 @@ package ao
 import (
 	"testing"
 
+	"net/http"
 	"net/http/httptest"
 
 	"github.com/liteseed/argo/signer"
 	"github.com/liteseed/argo/transaction"
 	"gotest.tools/v3/assert"
 )
+
+func NewMUMock(URL string) MU {
+	return MU{
+		client: http.DefaultClient,
+		url:    URL,
+	}
+}
 
 func TestSendMessage(t *testing.T) {
 	process := "yugMfaR-u_11GkAuZhqeChPuzoxVYuJW8RnNCIby-D8"
@@ -20,7 +28,7 @@ func TestSendMessage(t *testing.T) {
 	ts := httptest.NewServer(nil)
 	defer ts.Close()
 
-	mu := NewMU(ts.URL)
+	mu := NewMUMock(ts.URL)
 	res, err := mu.SendMessage(process, data, tags, "", s)
 	assert.NilError(t, err)
 	assert.Check(t, res != "", true)
@@ -35,7 +43,7 @@ func TestSpawnProcess(t *testing.T) {
 	ts := httptest.NewServer(nil)
 	defer ts.Close()
 
-	mu := NewMU(ts.URL)
+	mu := NewMUMock(ts.URL)
 	res, err := mu.SpawnProcess(data, tags, s)
 	assert.NilError(t, err)
 	assert.Check(t, res != "", true)
