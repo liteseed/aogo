@@ -11,7 +11,6 @@ import (
 )
 
 func TestSendMessage(t *testing.T) {
-
 	process := "yugMfaR-u_11GkAuZhqeChPuzoxVYuJW8RnNCIby-D8"
 	data := ""
 	tags := []transaction.Tag{{Name: "Action", Value: "Stakers"}}
@@ -28,7 +27,6 @@ func TestSendMessage(t *testing.T) {
 }
 
 func TestSpawnProcess(t *testing.T) {
-
 	data := ""
 	tags := []transaction.Tag{{Name: "Action", Value: "Stakers"}}
 	s, err := signer.New("../data/wallet.json")
