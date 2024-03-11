@@ -100,12 +100,15 @@ func decodeAvro(data []byte) (*[]Tag, error) {
 }
 
 func encodeTags(tags *[]Tag) ([]byte, error) {
-	data, err := encodeAvro(tags)
-	if err != nil {
-		return nil, err
-	}
+	if len(*tags) > 0 {
+		data, err := encodeAvro(tags)
+		if err != nil {
+			return nil, err
+		}
 
-	return data, nil
+		return data, nil
+	}
+	return nil, nil
 }
 
 func encodeAvro(tags *[]Tag) ([]byte, error) {

@@ -10,9 +10,9 @@ import (
 const (
 	MU_URL    = "https://mu.ao-testnet.xyz"
 	CU_URL    = "https://cu.ao-testnet.xyz"
-	SCHEDULER = "1SafZGlZT4TLI8xoc0QEQ4MylHhuyQUblxD8xLKvEKI"
+	SCHEDULER = "fcoN_xJeisVsPXA-trzVAuIiqO3ydLQxM-L4XbrQKzY"
 	GATEWAY   = "https://arweave.net"
-	module    = ""
+	MODULE    = "1SafZGlZT4TLI8xoc0QEQ4MylHhuyQUblxD8xLKvEKI"
 
 	sdk = "argo"
 )
@@ -31,8 +31,8 @@ func New() *AO {
 
 // MU Functions
 
-func (ao *AO) SpawnProcess(data string, tags []transaction.Tag, anchor string, s *signer.Signer) (string, error) {
-	return ao.mu.SpawnProcess(data, tags, SCHEDULER, anchor, s)
+func (ao *AO) SpawnProcess(data string, tags []transaction.Tag, s *signer.Signer) (string, error) {
+	return ao.mu.SpawnProcess(data, tags, s)
 }
 
 func (ao *AO) SendMessage(process string, data string, tags []transaction.Tag, anchor string, s *signer.Signer) (string, error) {

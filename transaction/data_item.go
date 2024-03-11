@@ -9,7 +9,6 @@ import (
 )
 
 func NewDataItem(rawData []byte, s signer.Signer, target string, anchor string, tags []Tag) (*DataItem, error) {
-
 	rawOwner := []byte(s.S.PubKey.N.Bytes())
 	rawTarget, err := base64.RawURLEncoding.DecodeString(target)
 	if err != nil {
@@ -57,17 +56,18 @@ func NewDataItem(rawData []byte, s signer.Signer, target string, anchor string, 
 	}
 	raw = append(raw, rawAnchor...)
 
-	numberOfTags := make([]byte, 8)
-	binary.LittleEndian.PutUint16(numberOfTags, uint16(len(tags)))
-	raw = append(raw, numberOfTags...)
+	if len(tags) > 0 {
+		numberOfTags := make([]byte, 8)
+		binary.LittleEndian.PutUint16(numberOfTags, uint16(len(tags)))
+		raw = append(raw, numberOfTags...)
 
-	tagsLength := make([]byte, 8)
-	binary.LittleEndian.PutUint16(tagsLength, uint16(len(tagsBytes)))
-	raw = append(raw, tagsLength...)
-	raw = append(raw, tagsBytes...)
+		tagsLength := make([]byte, 8)
+		binary.LittleEndian.PutUint16(tagsLength, uint16(len(tagsBytes)))
+		raw = append(raw, tagsLength...)
+		raw = append(raw, tagsBytes...)
 
-	raw = append(raw, rawData...)
-
+		raw = append(raw, rawData...)
+	}
 	rawID, err := hash(rawSignature)
 	if err != nil {
 		return nil, err

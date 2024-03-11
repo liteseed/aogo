@@ -35,24 +35,46 @@ func TestDecodeDataItem(t *testing.T) {
 }
 
 func TestNewDataItem(t *testing.T) {
-	data := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{};':\",./<>?`~"
-	tags := []Tag{
-		{Name: "tag1", Value: "value1"},
-		{Name: "tag2", Value: "value2"},
-	}
-	anchor := "thisSentenceIs32BytesLongTrustMe"
-	target := "OXcT1sVRSA5eGwt2k6Yuz8-3e3g9WJi5uSE99CWqsBs"
+	t.Run("test data item - data, tags, anchor, target", func(t *testing.T) {
+		data := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{};':\",./<>?`~"
+		tags := []Tag{
+			{Name: "tag1", Value: "value1"},
+			{Name: "tag2", Value: "value2"},
+		}
+		anchor := "thisSentenceIs32BytesLongTrustMe"
+		target := "OXcT1sVRSA5eGwt2k6Yuz8-3e3g9WJi5uSE99CWqsBs"
 
-	s, err := signer.New("../data/wallet.json")
-	assert.NilError(t, err)
-	argoDataItem, err := NewDataItem([]byte(data), *s, target, anchor, tags)
-	assert.NilError(t, err)
+		s, err := signer.New("../data/wallet.json")
+		assert.NilError(t, err)
+		argoDataItem, err := NewDataItem([]byte(data), *s, target, anchor, tags)
+		assert.NilError(t, err)
 
-	dataItem, err := DecodeDataItem(argoDataItem.Raw)
-	assert.NilError(t, err)
+		dataItem, err := DecodeDataItem(argoDataItem.Raw)
+		assert.NilError(t, err)
 
-	assert.Equal(t, dataItem.Owner, "gcUyzZCfsHfIk1WeHt2iMG5VktieAhakX8--cPa_Hi-Z0HICCe35ihgaGZXvkwIRI1oFvbC0DJmm5q3WUyx8NVa7PA1kxTirSjgaqw82fZjR_z6YL51Vki_REuTnkbJP1znjYR6ie5a1THppRGzwpPZK-uh6rQkMUOWZO5qHx_Jv3gAuEKu_IBH39Aef1BwPU3np_0vKkKQVMhpgyo7gDIxB2VYqL3WwAxRGuTf9x2Ihp3AU_dJPTJ6AuaLUR8b39YpYRe8bCWRjbOPlU4IL2_WfTGPUnIxnGXUzUMNZNjXy65zKhW3DrJgv48tk78_iVSWuX73EZPaJz521f7yuCINs84QnE0Q1-EPS5aX4yH4bHTGgHvXarDxORazR9wCEGvXLdYyTlt1DAmeHZSpdk5lNRVtBnbSHRYqQ0qJ02HPJn6WWDuNgtxxoEUEXSFojNQ5NGsDbxxjVEeo7cIdJXaF83E9p84Tvayc0q69Vu0pA8fE3ZL79mCT153nlnRHeAdUNX9H4vKXiGkomEO8Gun4Fi5dKfgOORtD5u0yMyeF__S1nT5a3bv29CLDbcgX5iWufSO9uXmF1atTo7NbcOKu-sm_tWwr4T95stF78dZu0DkzUO8ylGXF5r5Zzi2SVkOG1cjwLrZ91cAuPTNuzFfy04Sdv05fKoYZn-AJatvU")
-	assert.Equal(t, dataItem.Target, target)
-	assert.Equal(t, dataItem.Anchor, anchor)
-	assert.Equal(t, dataItem.Data, base64.RawURLEncoding.EncodeToString([]byte(data)))
+		assert.Equal(t, dataItem.Owner, "gcUyzZCfsHfIk1WeHt2iMG5VktieAhakX8--cPa_Hi-Z0HICCe35ihgaGZXvkwIRI1oFvbC0DJmm5q3WUyx8NVa7PA1kxTirSjgaqw82fZjR_z6YL51Vki_REuTnkbJP1znjYR6ie5a1THppRGzwpPZK-uh6rQkMUOWZO5qHx_Jv3gAuEKu_IBH39Aef1BwPU3np_0vKkKQVMhpgyo7gDIxB2VYqL3WwAxRGuTf9x2Ihp3AU_dJPTJ6AuaLUR8b39YpYRe8bCWRjbOPlU4IL2_WfTGPUnIxnGXUzUMNZNjXy65zKhW3DrJgv48tk78_iVSWuX73EZPaJz521f7yuCINs84QnE0Q1-EPS5aX4yH4bHTGgHvXarDxORazR9wCEGvXLdYyTlt1DAmeHZSpdk5lNRVtBnbSHRYqQ0qJ02HPJn6WWDuNgtxxoEUEXSFojNQ5NGsDbxxjVEeo7cIdJXaF83E9p84Tvayc0q69Vu0pA8fE3ZL79mCT153nlnRHeAdUNX9H4vKXiGkomEO8Gun4Fi5dKfgOORtD5u0yMyeF__S1nT5a3bv29CLDbcgX5iWufSO9uXmF1atTo7NbcOKu-sm_tWwr4T95stF78dZu0DkzUO8ylGXF5r5Zzi2SVkOG1cjwLrZ91cAuPTNuzFfy04Sdv05fKoYZn-AJatvU")
+		assert.Equal(t, dataItem.Target, target)
+		assert.Equal(t, dataItem.Anchor, anchor)
+		assert.Equal(t, dataItem.Data, base64.RawURLEncoding.EncodeToString([]byte(data)))
+	})
+	t.Run("empty test data item", func(t *testing.T) {
+		data := ""
+		tags := []Tag{}
+		anchor := ""
+		target := ""
+
+		s, err := signer.New("../data/wallet.json")
+		assert.NilError(t, err)
+		argoDataItem, err := NewDataItem([]byte(data), *s, target, anchor, tags)
+		assert.NilError(t, err)
+
+		dataItem, err := DecodeDataItem(argoDataItem.Raw)
+		assert.NilError(t, err)
+
+		assert.Equal(t, dataItem.Owner, "gcUyzZCfsHfIk1WeHt2iMG5VktieAhakX8--cPa_Hi-Z0HICCe35ihgaGZXvkwIRI1oFvbC0DJmm5q3WUyx8NVa7PA1kxTirSjgaqw82fZjR_z6YL51Vki_REuTnkbJP1znjYR6ie5a1THppRGzwpPZK-uh6rQkMUOWZO5qHx_Jv3gAuEKu_IBH39Aef1BwPU3np_0vKkKQVMhpgyo7gDIxB2VYqL3WwAxRGuTf9x2Ihp3AU_dJPTJ6AuaLUR8b39YpYRe8bCWRjbOPlU4IL2_WfTGPUnIxnGXUzUMNZNjXy65zKhW3DrJgv48tk78_iVSWuX73EZPaJz521f7yuCINs84QnE0Q1-EPS5aX4yH4bHTGgHvXarDxORazR9wCEGvXLdYyTlt1DAmeHZSpdk5lNRVtBnbSHRYqQ0qJ02HPJn6WWDuNgtxxoEUEXSFojNQ5NGsDbxxjVEeo7cIdJXaF83E9p84Tvayc0q69Vu0pA8fE3ZL79mCT153nlnRHeAdUNX9H4vKXiGkomEO8Gun4Fi5dKfgOORtD5u0yMyeF__S1nT5a3bv29CLDbcgX5iWufSO9uXmF1atTo7NbcOKu-sm_tWwr4T95stF78dZu0DkzUO8ylGXF5r5Zzi2SVkOG1cjwLrZ91cAuPTNuzFfy04Sdv05fKoYZn-AJatvU")
+		assert.Equal(t, dataItem.Target, target)
+		assert.Equal(t, dataItem.Anchor, anchor)
+		assert.Equal(t, dataItem.Data, base64.RawURLEncoding.EncodeToString([]byte(data)))
+	})
+
 }
