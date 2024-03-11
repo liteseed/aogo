@@ -11,7 +11,7 @@ import (
 )
 
 type IMU interface {
-	SendMessage(process string, data string, tags []transaction.Tag, anchor string, s *signer.Signer) (string, error)
+	SendMessage(process string, data string, tags []transaction.Tag, s *signer.Signer) (string, error)
 }
 type MU struct {
 	client *http.Client
@@ -25,12 +25,12 @@ func NewMU() MU {
 	}
 }
 
-func (mu MU) SendMessage(process string, data string, tags []transaction.Tag, anchor string, s *signer.Signer) (string, error) {
+func (mu MU) SendMessage(process string, data string, tags []transaction.Tag, s *signer.Signer) (string, error) {
 	tags = append(tags, transaction.Tag{Name: "Data-Protocol", Value: "ao"})
 	tags = append(tags, transaction.Tag{Name: "Variant", Value: "ao.TN.1"})
 	tags = append(tags, transaction.Tag{Name: "Type", Value: "Message"})
 	tags = append(tags, transaction.Tag{Name: "SDK", Value: "argo"})
-	dataItem, err := transaction.NewDataItem([]byte(data), *s, process, anchor, tags)
+	dataItem, err := transaction.NewDataItem([]byte(data), *s, process, "", tags)
 	if err != nil {
 		return "", err
 	}

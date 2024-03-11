@@ -9,3 +9,5 @@ arweave.json
 wallet.json
 keyfile.json
 bundle-keyfile.json
+
+main.go

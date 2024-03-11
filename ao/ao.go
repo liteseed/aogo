@@ -29,8 +29,8 @@ func (ao *AO) SpawnProcess(data string, tags []transaction.Tag, s *signer.Signer
 	return ao.mu.SpawnProcess(data, tags, s)
 }
 
-func (ao *AO) SendMessage(process string, data string, tags []transaction.Tag, anchor string, s *signer.Signer) (string, error) {
-	return ao.mu.SendMessage(process, data, tags, anchor, s)
+func (ao *AO) SendMessage(process string, data string, tags []transaction.Tag, s *signer.Signer) (string, error) {
+	return ao.mu.SendMessage(process, data, tags, s)
 }
 
 func (ao *AO) ReadResult(process string, message string) (*ReadResultResponse, error) {
