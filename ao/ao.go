@@ -12,7 +12,7 @@ const (
 	CU_URL    = "https://cu.ao-testnet.xyz"
 	SCHEDULER = "1SafZGlZT4TLI8xoc0QEQ4MylHhuyQUblxD8xLKvEKI"
 	GATEWAY   = "https://arweave.net"
-	AO_MODULE = ""
+	module    = ""
 
 	sdk = "argo"
 )

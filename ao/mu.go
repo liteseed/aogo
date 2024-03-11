@@ -2,7 +2,9 @@ package ao
 
 import (
 	"bytes"
+	"errors"
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/liteseed/argo/signer"
@@ -47,14 +49,19 @@ func (mu MU) SendMessage(process string, data string, tags []transaction.Tag, an
 func (mu MU) SpawnProcess(data string, tags []transaction.Tag, anchor string, scheduler string, s *signer.Signer) (string, error) {
 	tags = append(tags, transaction.Tag{Name: "Data-Protocol", Value: "ao"})
 	tags = append(tags, transaction.Tag{Name: "Variant", Value: "ao.TN.1"})
-	tags = append(tags, transaction.Tag{Name: "Type", Value: "Message"})
+	tags = append(tags, transaction.Tag{Name: "Type", Value: "Process"})
+	tags = append(tags, transaction.Tag{Name: "Module", Value: ""})
 	tags = append(tags, transaction.Tag{Name: "SDK", Value: sdk})
-	tags = append(tags, transaction.Tag{Name: "Scheduler", Value: scheduler})
 	dataItem, err := transaction.NewDataItem([]byte(data), *s, "", anchor, tags)
 	if err != nil {
 		return "", err
 	}
 	resp, err := mu.client.Post(mu.url, "application/octet-stream", bytes.NewBuffer(dataItem.Raw))
+	if resp.StatusCode != 200 {
+		return "", errors.New(resp.Status)
+	}
+	log.Println(resp)
+	log.Println(err)
 	if err != nil {
 		return "", err
 	}
