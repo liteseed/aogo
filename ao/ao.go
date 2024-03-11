@@ -8,9 +8,11 @@ import (
 const (
 	MU_URL    = "https://mu.ao-testnet.xyz"
 	CU_URL    = "https://cu.ao-testnet.xyz"
-	SU_URL    = "https://g8way.io/1SafZGlZT4TLI8xoc0QEQ4MylHhuyQUblxD8xLKvEKI"
+	SCHEDULER    = "1SafZGlZT4TLI8xoc0QEQ4MylHhuyQUblxD8xLKvEKI"
 	GATEWAY   = "https://arweave.net"
 	AO_MODULE = ""
+
+	sdk = "argo"
 )
 
 type AO struct {
@@ -26,7 +28,7 @@ func New() *AO {
 }
 
 func (ao *AO) SpawnProcess(data string, tags []transaction.Tag, s *signer.Signer) (string, error) {
-	return ao.mu.SpawnProcess(data, tags, s)
+	return ao.mu.SpawnProcess(data, tags, SCHEDULER, s)
 }
 
 func (ao *AO) SendMessage(process string, data string, tags []transaction.Tag, s *signer.Signer) (string, error) {
