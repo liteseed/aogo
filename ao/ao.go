@@ -31,14 +31,13 @@ func New() *AO {
 
 // MU Functions
 
-func (ao *AO) SpawnProcess(data string, tags []transaction.Tag, s *signer.Signer) (string, error) {
-	return ao.mu.SpawnProcess(data, tags, SCHEDULER, s)
+func (ao *AO) SpawnProcess(data string, tags []transaction.Tag, anchor string, s *signer.Signer) (string, error) {
+	return ao.mu.SpawnProcess(data, tags, SCHEDULER, anchor, s)
 }
 
-func (ao *AO) SendMessage(process string, data string, tags []transaction.Tag, s *signer.Signer) (string, error) {
-	return ao.mu.SendMessage(process, data, tags, s)
+func (ao *AO) SendMessage(process string, data string, tags []transaction.Tag, anchor string, s *signer.Signer) (string, error) {
+	return ao.mu.SendMessage(process, data, tags, anchor, s)
 }
-
 
 // CU Functions
 
@@ -46,7 +45,7 @@ func (ao *AO) ReadResult(process string, message string) (*ReadResultResponse, e
 	return ao.cu.ReadResult(process, message)
 }
 
-func (ao *AO) ReadResults(process string, message string) ( error) {
+func (ao *AO) ReadResults(process string, message string) error {
 	return errors.New("Unimplemented")
 }
 

@@ -29,7 +29,7 @@ func TestSendMessage(t *testing.T) {
 	defer ts.Close()
 
 	mu := NewMUMock(ts.URL)
-	res, err := mu.SendMessage(process, data, tags,  s)
+	res, err := mu.SendMessage(process, data, tags, "", s)
 	assert.NilError(t, err)
 	assert.Check(t, res != "", true)
 }
@@ -44,7 +44,7 @@ func TestSpawnProcess(t *testing.T) {
 	defer ts.Close()
 
 	mu := NewMUMock(ts.URL)
-	res, err := mu.SpawnProcess(data, tags, "", s)
+	res, err := mu.SpawnProcess(data, tags, "", "", s)
 	assert.NilError(t, err)
 	assert.Check(t, res != "", true)
 }

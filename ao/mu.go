@@ -24,12 +24,12 @@ func NewMU() MU {
 	}
 }
 
-func (mu MU) SendMessage(process string, data string, tags []transaction.Tag, s *signer.Signer) (string, error) {
+func (mu MU) SendMessage(process string, data string, tags []transaction.Tag, anchor string, s *signer.Signer) (string, error) {
 	tags = append(tags, transaction.Tag{Name: "Data-Protocol", Value: "ao"})
 	tags = append(tags, transaction.Tag{Name: "Variant", Value: "ao.TN.1"})
 	tags = append(tags, transaction.Tag{Name: "Type", Value: "Message"})
 	tags = append(tags, transaction.Tag{Name: "SDK", Value: sdk})
-	dataItem, err := transaction.NewDataItem([]byte(data), *s, process, "", tags)
+	dataItem, err := transaction.NewDataItem([]byte(data), *s, process, anchor, tags)
 	if err != nil {
 		return "", err
 	}
@@ -44,13 +44,13 @@ func (mu MU) SendMessage(process string, data string, tags []transaction.Tag, s 
 	return dataItem.ID, nil
 }
 
-func (mu MU) SpawnProcess(data string, tags []transaction.Tag, scheduler string, s *signer.Signer) (string, error) {
+func (mu MU) SpawnProcess(data string, tags []transaction.Tag, anchor string, scheduler string, s *signer.Signer) (string, error) {
 	tags = append(tags, transaction.Tag{Name: "Data-Protocol", Value: "ao"})
 	tags = append(tags, transaction.Tag{Name: "Variant", Value: "ao.TN.1"})
 	tags = append(tags, transaction.Tag{Name: "Type", Value: "Message"})
 	tags = append(tags, transaction.Tag{Name: "SDK", Value: sdk})
 	tags = append(tags, transaction.Tag{Name: "Scheduler", Value: scheduler})
-	dataItem, err := transaction.NewDataItem([]byte(data), *s, "", "", tags)
+	dataItem, err := transaction.NewDataItem([]byte(data), *s, "", anchor, tags)
 	if err != nil {
 		return "", err
 	}
