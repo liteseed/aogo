@@ -6,8 +6,6 @@ import (
 	"net/http"
 )
 
-
-
 type ICU interface {
 	ReadResult(process string, message string) (*ReadResultResponse, error)
 }
@@ -24,7 +22,6 @@ func NewCU() CU {
 	}
 }
 
-
 type ReadResultResponse struct {
 	Messages []map[string]interface{} `json:"Messages"`
 	Spawns   []any                    `json:"Spawns"`
@@ -32,7 +29,6 @@ type ReadResultResponse struct {
 	Errors   any                      `json:"Errors"`
 	GasUsed  int                      `json:"GasUsed"`
 }
-
 
 func (cu *CU) ReadResult(process string, message string) (*ReadResultResponse, error) {
 	resp, err := cu.client.Get(cu.url + "/result/" + message + "?process-id=" + process)
