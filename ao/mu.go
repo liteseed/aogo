@@ -3,7 +3,6 @@ package ao
 import (
 	"bytes"
 	"io"
-	"log"
 	"net/http"
 
 	"github.com/liteseed/argo/signer"
@@ -38,8 +37,6 @@ func (mu MU) SendMessage(process string, data string, tags []transaction.Tag, s 
 	if err != nil {
 		return "", err
 	}
-	log.Println(resp.Status)
-	log.Println(err)
 	_, err = io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
@@ -61,8 +58,6 @@ func (mu MU) SpawnProcess(data string, tags []transaction.Tag, scheduler string,
 	if err != nil {
 		return "", err
 	}
-	log.Println(resp.Status)
-	log.Println(err)
 	_, err = io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
