@@ -27,7 +27,7 @@ func main() {
 
  processId := "your-process-id"
  data := "your-data"
- tags := []transaction.Tag{{}}
+ tags := []transaction.Tag{{Name: "", Value: ""}}
  // Send a message to your AO process
  messageId, err := ao.SendMessage(processId, data, tags, s)
  if err != nil {
