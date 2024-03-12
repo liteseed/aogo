@@ -10,11 +10,11 @@ import (
 const (
 	MU_URL    = "https://mu.ao-testnet.xyz"
 	CU_URL    = "https://cu.ao-testnet.xyz"
-	SCHEDULER = "fcoN_xJeisVsPXA-trzVAuIiqO3ydLQxM-L4XbrQKzY"
+	SCHEDULER = "_GQ33BkPtZrqxA84vM8Zk-N2aO0toNNu_C-l-rawrBA"
 	GATEWAY   = "https://arweave.net"
-	MODULE    = "1SafZGlZT4TLI8xoc0QEQ4MylHhuyQUblxD8xLKvEKI"
+	MODULE    = "9afQ1PLf2mrshqCTZEzzJTR2gWaC9zNPnYgYEqg1Pt4"
 
-	sdk = "argo"
+	SDK = "argo"
 )
 
 type AO struct {

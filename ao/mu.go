@@ -13,7 +13,9 @@ import (
 
 type IMU interface {
 	SendMessage(process string, data string, tags []transaction.Tag, s *signer.Signer) (string, error)
-	SpawnProcess(data string, tags []transaction.Tag, scheduler string, s *signer.Signer) (string, error)
+	SpawnProcess(data string, tags []transaction.Tag, s *signer.Signer) (string, error)
+
+	Monitor()
 }
 type MU struct {
 	client *http.Client
@@ -28,10 +30,11 @@ func NewMU() MU {
 }
 
 func (mu MU) SendMessage(process string, data string, tags []transaction.Tag, anchor string, s *signer.Signer) (string, error) {
+	log.Println("sending message - process: " + process)
 	tags = append(tags, transaction.Tag{Name: "Data-Protocol", Value: "ao"})
 	tags = append(tags, transaction.Tag{Name: "Variant", Value: "ao.TN.1"})
 	tags = append(tags, transaction.Tag{Name: "Type", Value: "Message"})
-	tags = append(tags, transaction.Tag{Name: "SDK", Value: sdk})
+	tags = append(tags, transaction.Tag{Name: "SDK", Value: SDK})
 	dataItem, err := transaction.NewDataItem([]byte(data), *s, process, anchor, tags)
 	if err != nil {
 		return "", err
@@ -48,13 +51,15 @@ func (mu MU) SendMessage(process string, data string, tags []transaction.Tag, an
 }
 
 func (mu MU) SpawnProcess(data string, tags []transaction.Tag, s *signer.Signer) (string, error) {
+	log.Println("spawning process")
 	tags = append(tags, transaction.Tag{Name: "Data-Protocol", Value: "ao"})
 	tags = append(tags, transaction.Tag{Name: "Variant", Value: "ao.TN.1"})
 	tags = append(tags, transaction.Tag{Name: "Type", Value: "Process"})
 	tags = append(tags, transaction.Tag{Name: "Scheduler", Value: SCHEDULER})
 	tags = append(tags, transaction.Tag{Name: "Module", Value: MODULE})
-	tags = append(tags, transaction.Tag{Name: "SDK", Value: sdk})
+	tags = append(tags, transaction.Tag{Name: "SDK", Value: SDK})
 	dataItem, err := transaction.NewDataItem([]byte(data), *s, "", "", tags)
+
 	if err != nil {
 		return "", err
 	}
@@ -68,16 +73,16 @@ func (mu MU) SpawnProcess(data string, tags []transaction.Tag, s *signer.Signer)
 	if err != nil {
 		return "", err
 	}
+	if resp.StatusCode != 202 {
+		return "", errors.New(resp.Status)
+	}
 	defer resp.Body.Close()
 
 	res, err := io.ReadAll(resp.Body)
-
 	if err != nil {
 		return "", err
 	}
-	log.Print(string(res))
-	if resp.StatusCode != 200 {
-		return "", errors.New(resp.Status)
-	}
+
+	log.Println(string(res))
 	return dataItem.ID, nil
 }
