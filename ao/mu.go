@@ -73,11 +73,11 @@ func (mu MU) SpawnProcess(data string, tags []transaction.Tag, s *signer.Signer)
 	if err != nil {
 		return "", err
 	}
+	defer resp.Body.Close()
+
 	if resp.StatusCode != 202 {
 		return "", errors.New(resp.Status)
 	}
-	defer resp.Body.Close()
-
 	res, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
