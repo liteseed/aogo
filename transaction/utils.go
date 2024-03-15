@@ -1,10 +1,10 @@
 package transaction
 
 import (
-	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/base64"
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"reflect"
 
@@ -54,17 +54,17 @@ func getAnchor(data *[]byte, position int) (string, int) {
 	return anchor, position + 1
 }
 
-func decodeTags(data *[]byte, startAt int) (*[]Tag, int, error) {
+func encodeTags(data *[]byte, startAt int) (*[]Tag, int, error) {
 	tags := &[]Tag{}
-	tagsEnd := startAt + 8
+	tagsEnd := startAt + 8 + 8
 	numberOfTags := int(binary.LittleEndian.Uint16((*data)[startAt : startAt+8]))
-
-	if numberOfTags > 0 {
-
-		numberOfTagBytesStart := startAt + 8
-		numberOfTagBytesEnd := numberOfTagBytesStart + 8
-		numberOfTagBytes := int(binary.LittleEndian.Uint16((*data)[numberOfTagBytesStart:numberOfTagBytesEnd]))
-
+	numberOfTagBytesStart := startAt + 8
+	numberOfTagBytesEnd := numberOfTagBytesStart + 8
+	numberOfTagBytes := int(binary.LittleEndian.Uint16((*data)[numberOfTagBytesStart:numberOfTagBytesEnd]))
+	if numberOfTags > 127 {
+		return tags, tagsEnd, errors.New("invalid data item - max tags 127")
+	}
+	if numberOfTags > 0 && numberOfTagBytes > 0 {
 		bytesDataStart := numberOfTagBytesEnd
 		bytesDataEnd := numberOfTagBytesEnd + numberOfTagBytes
 		bytesData := (*data)[bytesDataStart:bytesDataEnd]
@@ -99,7 +99,7 @@ func decodeAvro(data []byte) (*[]Tag, error) {
 	return tags, err
 }
 
-func encodeTags(tags *[]Tag) ([]byte, error) {
+func decodeTags(tags *[]Tag) ([]byte, error) {
 	if len(*tags) > 0 {
 		data, err := encodeAvro(tags)
 		if err != nil {
@@ -159,16 +159,6 @@ func decodeBundleHeader(data *[]byte) (*[]BundleHeader, int) {
 		headers = append(headers, BundleHeader{id: id, size: size})
 	}
 	return &headers, N
-}
-
-func hash(data []byte) ([]byte, error) {
-	h := sha256.New()
-	_, err := h.Write(data)
-	if err != nil {
-		return nil, err
-	}
-	r := h.Sum(nil)
-	return r, nil
 }
 
 func typeof(v interface{}) string {

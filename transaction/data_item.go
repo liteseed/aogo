@@ -8,6 +8,12 @@ import (
 	"github.com/liteseed/argo/signer"
 )
 
+const (
+	MAX_TAGS             = 128
+	MAX_TAG_KEY_LENGTH   = 1024
+	MAX_TAG_VALUE_LENGTH = 3072
+)
+
 func NewDataItem(rawData []byte, s signer.Signer, target string, anchor string, tags []Tag) (*DataItem, error) {
 	rawOwner := []byte(s.S.PubKey.N.Bytes())
 	rawTarget, err := base64.RawURLEncoding.DecodeString(target)
@@ -16,7 +22,7 @@ func NewDataItem(rawData []byte, s signer.Signer, target string, anchor string, 
 	}
 	rawAnchor := []byte(anchor)
 
-	tagsBytes, err := encodeTags(&tags)
+	rawTags, err := decodeTags(&tags)
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +34,7 @@ func NewDataItem(rawData []byte, s signer.Signer, target string, anchor string, 
 		rawOwner,
 		rawTarget,
 		rawAnchor,
-		tagsBytes,
+		rawTags,
 		rawData,
 	}
 	signatureData := DeepHash(chunks)
@@ -55,23 +61,20 @@ func NewDataItem(rawData []byte, s signer.Signer, target string, anchor string, 
 		raw = append(raw, 1)
 	}
 	raw = append(raw, rawAnchor...)
+	numberOfTags := make([]byte, 8)
+	binary.LittleEndian.PutUint16(numberOfTags, uint16(len(tags)))
+	raw = append(raw, numberOfTags...)
 
-	if len(tags) > 0 {
-		numberOfTags := make([]byte, 8)
-		binary.LittleEndian.PutUint16(numberOfTags, uint16(len(tags)))
-		raw = append(raw, numberOfTags...)
-
-		tagsLength := make([]byte, 8)
-		binary.LittleEndian.PutUint16(tagsLength, uint16(len(tagsBytes)))
-		raw = append(raw, tagsLength...)
-		raw = append(raw, tagsBytes...)
-
-		raw = append(raw, rawData...)
-	}
+	tagsLength := make([]byte, 8)
+	binary.LittleEndian.PutUint16(tagsLength, uint16(len(rawTags)))
+	raw = append(raw, tagsLength...)
+	raw = append(raw, rawTags...)
+	raw = append(raw, rawData...)
 	rawID, err := hash(rawSignature)
 	if err != nil {
 		return nil, err
 	}
+	data := base64.RawURLEncoding.EncodeToString(rawData)
 	return &DataItem{
 		SignatureType: 1,
 		Signature:     base64.RawURLEncoding.EncodeToString(rawSignature),
@@ -80,7 +83,7 @@ func NewDataItem(rawData []byte, s signer.Signer, target string, anchor string, 
 		Target:        target,
 		Anchor:        anchor,
 		Tags:          tags,
-		Data:          string(rawData),
+		Data:          data,
 		Raw:           raw,
 	}, nil
 }
@@ -112,7 +115,7 @@ func DecodeDataItem(raw []byte) (*DataItem, error) {
 	position := ownerEnd
 	target, position := getTarget(&raw, position)
 	anchor, position := getAnchor(&raw, position)
-	tags, position, err := decodeTags(&raw, position)
+	tags, position, err := encodeTags(&raw, position)
 	if err != nil {
 		return nil, err
 	}
@@ -129,4 +132,78 @@ func DecodeDataItem(raw []byte) (*DataItem, error) {
 		Data:          data,
 		Raw:           raw,
 	}, nil
+}
+
+func VerifyDataItem(dataItem *DataItem) (bool, error) {
+
+	// Verify ID
+	rawSignature, err := base64.RawURLEncoding.DecodeString(dataItem.Signature)
+	if err != nil {
+		return false, err
+	}
+	rawId, err := hash(rawSignature)
+	if err != nil {
+		return false, err
+	}
+	id := base64.RawURLEncoding.EncodeToString(rawId)
+	if id != dataItem.ID {
+		return false, errors.New("invalid data item - signature and id don't match")
+	}
+
+	// Verify Signature Owner
+	rawOwner, err := base64.RawURLEncoding.DecodeString(dataItem.Owner)
+	if err != nil {
+		return false, err
+	}
+	rawTarget, err := base64.RawURLEncoding.DecodeString(dataItem.Target)
+	if err != nil {
+		return false, err
+	}
+	rawAnchor := []byte(dataItem.Anchor)
+	rawTags, err := decodeTags(&dataItem.Tags)
+	if err != nil {
+		return false, err
+	}
+	rawData, err := base64.RawURLEncoding.DecodeString(dataItem.Data)
+	if err != nil {
+		return false, err
+	}
+	chunks := []interface{}{
+		[]byte("dataitem"),
+		[]byte("1"),
+		[]byte("1"),
+		rawOwner,
+		rawTarget,
+		rawAnchor,
+		rawTags,
+		rawData,
+	}
+	signatureData := DeepHash(chunks)
+
+	valid, err := verify(signatureData[:], rawSignature, dataItem.Owner)
+	if err != nil {
+		return false, err
+	}
+	if !valid {
+		return false, errors.New("invalid data item - signature failed to verify")
+	}
+
+	// VERIFY TAGS
+	if len(dataItem.Tags) > MAX_TAGS {
+		return false, errors.New("invalid data item - tags cannot be more than 128")
+	}
+
+	for _, tag := range dataItem.Tags {
+		if len([]byte(tag.Name)) == 0 || len([]byte(tag.Name)) > MAX_TAG_KEY_LENGTH {
+			return false, errors.New("invalid data item - tag key too long")
+		}
+		if len([]byte(tag.Value)) == 0 || len([]byte(tag.Value)) > MAX_TAG_VALUE_LENGTH {
+			return false, errors.New("invalid data item - tag value too long")
+		}
+	}
+
+	if len([]byte(dataItem.Anchor)) > 32 {
+		return false, errors.New("invalid data item - anchor should be 32 bytes")
+	}
+	return true, nil
 }
