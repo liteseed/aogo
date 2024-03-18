@@ -1,7 +1,6 @@
 package transaction
 
 import (
-	"encoding/base64"
 	"errors"
 )
 
@@ -13,7 +12,7 @@ func DecodeBundle(data []byte) (*Bundle, error) {
 	headers, N := decodeBundleHeader(&data)
 	bundle := &Bundle{
 		Items:   make([]DataItem, N),
-		RawData: base64.RawURLEncoding.EncodeToString(data),
+		RawData: data,
 	}
 	bundleStart := 32 + 64*N
 	for i := 0; i < N; i++ {
@@ -50,7 +49,7 @@ func NewBundle(dataItems *[]DataItem) (*Bundle, error) {
 		dataItemsBytes = append(dataItemsBytes, (*headers)[i].raw...)
 	}
 
-	bundle.RawData = base64.RawURLEncoding.EncodeToString(append(sizeBytes, append(headersBytes, dataItemsBytes...)...))
+	bundle.RawData = append(sizeBytes, append(headersBytes, dataItemsBytes...)...)
 	return bundle, nil
 }
 
@@ -66,4 +65,3 @@ func ValidateBundle(data []byte) (bool, error) {
 	}
 	return len(data) == dataItemSize+32+64*N, nil
 }
-

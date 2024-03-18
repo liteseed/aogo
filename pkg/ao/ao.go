@@ -3,8 +3,8 @@ package ao
 import (
 	"errors"
 
-	"github.com/liteseed/argo/signer"
-	"github.com/liteseed/argo/transaction"
+	"github.com/liteseed/argo/pkg/transaction"
+	"github.com/liteseed/argo/pkg/signer"
 )
 
 const (

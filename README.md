@@ -12,7 +12,7 @@ import (
 
  "github.com/liteseed/argo/ao"
  "github.com/liteseed/argo/signer"
- "github.com/liteseed/argo/transaction"
+ "github.com/liteseed/argo/pkg/transaction"
 )
 
 func main() {

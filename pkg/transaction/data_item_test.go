@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/liteseed/argo/signer"
+	"github.com/liteseed/argo/pkg/signer"
 	"gotest.tools/v3/assert"
 )
 

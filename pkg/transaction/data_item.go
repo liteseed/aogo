@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"errors"
 
-	"github.com/liteseed/argo/signer"
+	"github.com/liteseed/argo/pkg/signer"
 )
 
 const (

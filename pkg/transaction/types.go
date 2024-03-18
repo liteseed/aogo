@@ -1,4 +1,5 @@
 package transaction
+
 const (
 	Arweave  = 1
 	ED25519  = 2
@@ -34,6 +35,7 @@ var SignatureConfig = map[int]SignatureMeta{
 		Name:            "solana",
 	},
 }
+
 type Tag struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
@@ -60,5 +62,21 @@ type BundleHeader struct {
 type Bundle struct {
 	Headers []BundleHeader `json:"bundle_header"`
 	Items   []DataItem     `json:"items"`
-	RawData string         `json:"raw_data"`
+	RawData []byte         `json:"raw_data"`
+}
+
+type Transaction struct {
+	Format    int    `json:"format"`
+	ID        string `json:"id"`
+	LastTx    string `json:"last_tx"`
+	Owner     string `json:"owner"` // utils.Base64Encode(wallet.PubKey.N.Bytes())
+	Tags      []Tag  `json:"tags"`
+	Target    string `json:"target"`
+	Quantity  string `json:"quantity"`
+	Data      string `json:"data"` // base64.encode
+	DataSize  string `json:"data_size"`
+	DataRoot  string `json:"data_root"`
+	Reward    string `json:"reward"`
+	Signature string `json:"signature"`
+	Raw       []byte
 }
