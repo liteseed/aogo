@@ -62,7 +62,7 @@ type BundleHeader struct {
 type Bundle struct {
 	Headers []BundleHeader `json:"bundle_header"`
 	Items   []DataItem     `json:"items"`
-	RawData []byte         `json:"raw_data"`
+	Raw     []byte         `json:"raw_data"`
 }
 
 type Transaction struct {

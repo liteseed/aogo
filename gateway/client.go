@@ -8,7 +8,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/liteseed/argo/pkg/transaction"
+	"github.com/liteseed/argo/transaction"
 )
 
 type Gateway struct {

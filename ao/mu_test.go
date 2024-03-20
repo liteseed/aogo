@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	"github.com/liteseed/argo/pkg/transaction"
-	"github.com/liteseed/argo/pkg/signer"
+	"github.com/liteseed/argo/signer"
+	"github.com/liteseed/argo/transaction"
 	"gotest.tools/v3/assert"
 )
 

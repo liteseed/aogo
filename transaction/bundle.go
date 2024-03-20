@@ -1,8 +1,6 @@
 package transaction
 
-import (
-	"errors"
-)
+import "errors"
 
 func DecodeBundle(data []byte) (*Bundle, error) {
 	// length must more than 32
@@ -11,8 +9,8 @@ func DecodeBundle(data []byte) (*Bundle, error) {
 	}
 	headers, N := decodeBundleHeader(&data)
 	bundle := &Bundle{
-		Items:   make([]DataItem, N),
-		RawData: data,
+		Items: make([]DataItem, N),
+		Raw:   data,
 	}
 	bundleStart := 32 + 64*N
 	for i := 0; i < N; i++ {
@@ -49,7 +47,7 @@ func NewBundle(dataItems *[]DataItem) (*Bundle, error) {
 		dataItemsBytes = append(dataItemsBytes, (*headers)[i].raw...)
 	}
 
-	bundle.RawData = append(sizeBytes, append(headersBytes, dataItemsBytes...)...)
+	bundle.Raw = append(sizeBytes, append(headersBytes, dataItemsBytes...)...)
 	return bundle, nil
 }
 
