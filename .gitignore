@@ -2,12 +2,13 @@
 .env
 
 dist
-data
 temp
+keys
 
 arweave.json
 wallet.json
 keyfile.json
 bundle-keyfile.json
+signer.json
 
 main.go

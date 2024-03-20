@@ -8,7 +8,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/liteseed/argo/transaction"
+	Data "github.com/liteseed/argo/data"
 )
 
 type Gateway struct {
@@ -54,7 +54,7 @@ func (g *Gateway) GetTransactionAnchor() (string, error) {
 	return string(body), nil
 }
 
-func (g *Gateway) SendTransaction(t *transaction.Transaction) error {
+func (g *Gateway) SendTransaction(t *Data.Transaction) error {
 	resp, err := g.client.Post(fmt.Sprintf("%s/tx", g.url), "application/json", bytes.NewBuffer(t.Raw))
 	if err != nil {
 		return err

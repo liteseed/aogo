@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/liteseed/argo/signer"
-	"github.com/liteseed/argo/transaction"
+	Data "github.com/liteseed/argo/data"
 )
 
 const (
@@ -31,11 +31,11 @@ func New() *AO {
 
 // MU Functions
 
-func (ao *AO) SpawnProcess(data string, tags []transaction.Tag, s *signer.Signer) (string, error) {
+func (ao *AO) SpawnProcess(data string, tags []Data.Tag, s *signer.Signer) (string, error) {
 	return ao.mu.SpawnProcess(data, tags, s)
 }
 
-func (ao *AO) SendMessage(process string, data string, tags []transaction.Tag, anchor string, s *signer.Signer) (string, error) {
+func (ao *AO) SendMessage(process string, data string, tags []Data.Tag, anchor string, s *signer.Signer) (string, error) {
 	return ao.mu.SendMessage(process, data, tags, anchor, s)
 }
 

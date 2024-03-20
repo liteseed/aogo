@@ -7,13 +7,13 @@ import (
 	"log"
 	"net/http"
 
+	Data "github.com/liteseed/argo/data"
 	"github.com/liteseed/argo/signer"
-	"github.com/liteseed/argo/transaction"
 )
 
 type IMU interface {
-	SendMessage(process string, data string, tags []transaction.Tag, s *signer.Signer) (string, error)
-	SpawnProcess(data string, tags []transaction.Tag, s *signer.Signer) (string, error)
+	SendMessage(process string, data string, tags []Data.Tag, s *signer.Signer) (string, error)
+	SpawnProcess(data string, tags []Data.Tag, s *signer.Signer) (string, error)
 
 	Monitor()
 }
@@ -29,13 +29,13 @@ func NewMU() MU {
 	}
 }
 
-func (mu MU) SendMessage(process string, data string, tags []transaction.Tag, anchor string, s *signer.Signer) (string, error) {
+func (mu MU) SendMessage(process string, data string, tags []Data.Tag, anchor string, s *signer.Signer) (string, error) {
 	log.Println("sending message - process: " + process)
-	tags = append(tags, transaction.Tag{Name: "Data-Protocol", Value: "ao"})
-	tags = append(tags, transaction.Tag{Name: "Variant", Value: "ao.TN.1"})
-	tags = append(tags, transaction.Tag{Name: "Type", Value: "Message"})
-	tags = append(tags, transaction.Tag{Name: "SDK", Value: SDK})
-	dataItem, err := transaction.NewDataItem([]byte(data), *s, process, anchor, tags)
+	tags = append(tags, Data.Tag{Name: "Data-Protocol", Value: "ao"})
+	tags = append(tags, Data.Tag{Name: "Variant", Value: "ao.TN.1"})
+	tags = append(tags, Data.Tag{Name: "Type", Value: "Message"})
+	tags = append(tags, Data.Tag{Name: "SDK", Value: SDK})
+	dataItem, err := Data.NewDataItem([]byte(data), *s, process, anchor, tags)
 	if err != nil {
 		return "", err
 	}
@@ -50,15 +50,15 @@ func (mu MU) SendMessage(process string, data string, tags []transaction.Tag, an
 	return dataItem.ID, nil
 }
 
-func (mu MU) SpawnProcess(data string, tags []transaction.Tag, s *signer.Signer) (string, error) {
+func (mu MU) SpawnProcess(data string, tags []Data.Tag, s *signer.Signer) (string, error) {
 	log.Println("spawning process")
-	tags = append(tags, transaction.Tag{Name: "Data-Protocol", Value: "ao"})
-	tags = append(tags, transaction.Tag{Name: "Variant", Value: "ao.TN.1"})
-	tags = append(tags, transaction.Tag{Name: "Type", Value: "Process"})
-	tags = append(tags, transaction.Tag{Name: "Scheduler", Value: SCHEDULER})
-	tags = append(tags, transaction.Tag{Name: "Module", Value: MODULE})
-	tags = append(tags, transaction.Tag{Name: "SDK", Value: SDK})
-	dataItem, err := transaction.NewDataItem([]byte(data), *s, "", "", tags)
+	tags = append(tags, Data.Tag{Name: "Data-Protocol", Value: "ao"})
+	tags = append(tags, Data.Tag{Name: "Variant", Value: "ao.TN.1"})
+	tags = append(tags, Data.Tag{Name: "Type", Value: "Process"})
+	tags = append(tags, Data.Tag{Name: "Scheduler", Value: SCHEDULER})
+	tags = append(tags, Data.Tag{Name: "Module", Value: MODULE})
+	tags = append(tags, Data.Tag{Name: "SDK", Value: SDK})
+	dataItem, err := Data.NewDataItem([]byte(data), *s, "", "", tags)
 
 	if err != nil {
 		return "", err
