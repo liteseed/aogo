@@ -10,38 +10,54 @@ package main
 
 import (
  "log"
+ "os"
+ // "os"
 
- "github.com/liteseed/argo/ao"
- "github.com/liteseed/argo/signer"
- "github.com/liteseed/argo/transaction"
+ "github.com/everFinance/goar"
+ "github.com/everFinance/goar/types"
+ "github.com/liteseed/aogo"
 )
 
 func main() {
+
  // Make a Signer
- s, err := signer.New("./data/wallet.json")
+ s, err := goar.NewSignerFromPath("./keys/wallet.json")
+ if err != nil {
+  log.Fatal(err)
+ }
+ itemSigner, err := goar.NewItemSigner(s)
+ // Initialize an AO Struct
  if err != nil {
   log.Fatal(err)
  }
 
  // Initialize an AO Struct
- ao := ao.New()
-
- processId := "your-process-id"
- data := "your-data"
- tags := []transaction.Tag{{Name: "", Value: ""}}
- // Send a message to your AO process
- messageId, err := ao.SendMessage(processId, data, tags, s)
+ ao, err := aogo.New()
  if err != nil {
   log.Fatal(err)
  }
 
+ data := []byte{1, 2, 3}
+ 
+ //Spawn a process with some data
+ processId, err := ao.SpawnProcess(data, []types.Tag{}, itemSigner)
+ if err != nil {
+  log.Fatal(err)
+ }
+ log.Println(processId)
+
+ // Send a message to your AO process
+ messageId, err := ao.SendMessage(processId, data, []types.Tag{{Name: "Action", Value: "Eval"}}, "", itemSigner)
+ if err != nil {
+  log.Fatal(err)
+ }
+ log.Println(messageId)
  // Read message result
  res, err := ao.ReadResult(processId, messageId)
  if err != nil {
   log.Fatal(err)
  }
-
- log.Println(res.Messages)
+ log.Println(res)
 }
 
 ```
