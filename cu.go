@@ -1,4 +1,4 @@
-package ao
+package aogo
 
 import (
 	"encoding/json"
@@ -15,10 +15,10 @@ type CU struct {
 	url    string
 }
 
-func NewCU() CU {
+func newCU(url string) CU {
 	return CU{
 		client: http.DefaultClient,
-		url:    CU_URL,
+		url:    url,
 	}
 }
 

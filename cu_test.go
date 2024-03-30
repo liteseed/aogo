@@ -1,4 +1,4 @@
-package ao
+package aogo
 
 import (
 	"encoding/json"
@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	"gotest.tools/v3/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 func NewCUMock(URL string) CU {
@@ -52,9 +52,9 @@ func TestReadResult(t *testing.T) {
 
 	handlerFunc := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		data, err := json.Marshal(map[string]any{"Messages": messages, "Spawns": []any{}, "Outputs": []any{}, "GasUsed": 599159077})
-		assert.NilError(t, err)
+		assert.NoError(t, err)
 		_, err = w.Write(data)
-		assert.NilError(t, err)
+		assert.NoError(t, err)
 	})
 
 	http.HandleFunc("/result/"+message, handlerFunc)
@@ -65,10 +65,10 @@ func TestReadResult(t *testing.T) {
 	cu := NewCUMock(ts.URL)
 
 	res, err := cu.ReadResult(process, message)
-	assert.NilError(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, messages[0]["Target"], res.Messages[0]["Target"].(string))
 	assert.Equal(t, messages[0]["Anchor"], res.Messages[0]["Anchor"].(string))
 	assert.Equal(t, messages[0]["Data"], res.Messages[0]["Data"].(string))
-	assert.DeepEqual(t, messages[0]["Tags"], res.Messages[0]["Tags"])
+	assert.ElementsMatch(t, messages[0]["Tags"], res.Messages[0]["Tags"])
 	assert.Equal(t, res.GasUsed, 599159077)
 }

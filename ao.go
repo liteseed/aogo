@@ -1,10 +1,10 @@
-package ao
+package aogo
 
 import (
 	"errors"
 
-	"github.com/liteseed/argo/signer"
-	Data "github.com/liteseed/argo/data"
+	"github.com/everFinance/goar"
+	"github.com/everFinance/goar/types"
 )
 
 const (
@@ -22,20 +22,33 @@ type AO struct {
 	cu CU
 }
 
-func New() *AO {
-	return &AO{
-		mu: NewMU(),
-		cu: NewCU(),
+func New(options ...func(*AO)) (*AO, error) {
+	ao := &AO{cu: newCU(CU_URL), mu: newMU(MU_URL)}
+	for _, o := range options {
+		o(ao)
+	}
+	return ao, nil
+}
+
+func WthMU(url string) func(*AO) {
+	return func(ao *AO) {
+		ao.mu = newMU(url)
+	}
+}
+
+func WthCU(url string) func(*AO) {
+	return func(ao *AO) {
+		ao.cu = newCU(url)
 	}
 }
 
 // MU Functions
 
-func (ao *AO) SpawnProcess(data string, tags []Data.Tag, s *signer.Signer) (string, error) {
+func (ao *AO) SpawnProcess(data []byte, tags []types.Tag, s *goar.ItemSigner) (string, error) {
 	return ao.mu.SpawnProcess(data, tags, s)
 }
 
-func (ao *AO) SendMessage(process string, data string, tags []Data.Tag, anchor string, s *signer.Signer) (string, error) {
+func (ao *AO) SendMessage(process string, data string, tags []types.Tag, anchor string, s *goar.ItemSigner) (string, error) {
 	return ao.mu.SendMessage(process, data, tags, anchor, s)
 }
 
