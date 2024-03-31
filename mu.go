@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"io"
-	"log"
 	"net/http"
 
 	"github.com/everFinance/goar"
@@ -30,7 +29,6 @@ func newMU(url string) MU {
 }
 
 func (mu MU) SendMessage(process string, data string, tags []types.Tag, anchor string, s *goar.ItemSigner) (string, error) {
-	log.Println("sending message - process: " + process)
 	tags = append(tags, types.Tag{Name: "Data-Protocol", Value: "ao"})
 	tags = append(tags, types.Tag{Name: "Variant", Value: "ao.TN.1"})
 	tags = append(tags, types.Tag{Name: "Type", Value: "Message"})
@@ -51,7 +49,6 @@ func (mu MU) SendMessage(process string, data string, tags []types.Tag, anchor s
 }
 
 func (mu MU) SpawnProcess(data []byte, tags []types.Tag, s *goar.ItemSigner) (string, error) {
-	log.Println("spawning process")
 	tags = append(tags, types.Tag{Name: "Data-Protocol", Value: "ao"})
 	tags = append(tags, types.Tag{Name: "Variant", Value: "ao.TN.1"})
 	tags = append(tags, types.Tag{Name: "Type", Value: "Process"})
@@ -79,11 +76,5 @@ func (mu MU) SpawnProcess(data []byte, tags []types.Tag, s *goar.ItemSigner) (st
 	if resp.StatusCode != 202 {
 		return "", errors.New(resp.Status)
 	}
-	res, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-
-	log.Println(string(res))
 	return dataItem.Id, nil
 }
