@@ -14,7 +14,7 @@ const (
 	GATEWAY   = "https://arweave.net"
 	MODULE    = "9afQ1PLf2mrshqCTZEzzJTR2gWaC9zNPnYgYEqg1Pt4"
 
-	SDK = "argo"
+	SDK = "aogo"
 )
 
 type AO struct {
