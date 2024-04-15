@@ -52,7 +52,7 @@ func TestSpawnProcess(t *testing.T) {
 	defer ts.Close()
 
 	mu := NewMUMock(ts.URL)
-	res, err := mu.SpawnProcess([]byte(data), tags, itemSigner)
+	res, err := mu.SpawnProcess(data, tags, itemSigner)
 
 	assert.NoError(t, err)
 	assert.True(t, res != "")

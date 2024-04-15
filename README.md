@@ -12,7 +12,6 @@ package main
 import (
  "log"
  "os"
- // "os"
 
  "github.com/everFinance/goar"
  "github.com/everFinance/goar/types"

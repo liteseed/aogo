@@ -11,4 +11,5 @@ keyfile.json
 bundle-keyfile.json
 signer.json
 
+main
 main.go
