@@ -18,6 +18,9 @@ import (
  "github.com/liteseed/aogo"
 )
 
+// AO MODULE ID - Get Latest from "https://github.com/permaweb/aos"
+const MODULE = "1PdCJiXhNafpJbvC-sjxWTeNzbf9Q_RfUNs84GYoPm0"
+
 func main() {
 
  // Make a Signer
@@ -40,7 +43,7 @@ func main() {
  data := []byte{1, 2, 3}
 
  //Spawn a process with some data
- processId, err := ao.SpawnProcess(data, []types.Tag{}, itemSigner)
+ processId, err := ao.SpawnProcess(MODULE, data, []types.Tag{}, itemSigner)
  if err != nil {
   log.Fatal(err)
  }
