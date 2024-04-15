@@ -51,7 +51,7 @@ func (mu MU) SendMessage(process string, data string, tags []types.Tag, anchor s
 	return dataItem.Id, nil
 }
 
-func (mu MU) SpawnProcess(data string, tags []types.Tag, s *goar.ItemSigner) (string, error) {
+func (mu MU) SpawnProcess(module string, data string, tags []types.Tag, s *goar.ItemSigner) (string, error) {
 	if data == "" {
 		data = "1984"
 	}
@@ -59,7 +59,7 @@ func (mu MU) SpawnProcess(data string, tags []types.Tag, s *goar.ItemSigner) (st
 	tags = append(tags, types.Tag{Name: "Variant", Value: "ao.TN.1"})
 	tags = append(tags, types.Tag{Name: "Type", Value: "Process"})
 	tags = append(tags, types.Tag{Name: "Scheduler", Value: SCHEDULER})
-	tags = append(tags, types.Tag{Name: "Module", Value: MODULE})
+	tags = append(tags, types.Tag{Name: "Module", Value: module})
 	tags = append(tags, types.Tag{Name: "SDK", Value: SDK})
 
 	dataItem, err := s.CreateAndSignItem([]byte(data), "", "", tags)

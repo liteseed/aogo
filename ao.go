@@ -12,7 +12,6 @@ const (
 	CU_URL    = "https://cu.ao-testnet.xyz"
 	SCHEDULER = "_GQ33BkPtZrqxA84vM8Zk-N2aO0toNNu_C-l-rawrBA"
 	GATEWAY   = "https://arweave.net"
-	MODULE    = "1PdCJiXhNafpJbvC-sjxWTeNzbf9Q_RfUNs84GYoPm0"
 
 	SDK = "aogo"
 )
@@ -44,8 +43,8 @@ func WthCU(url string) func(*AO) {
 
 // MU Functions
 
-func (ao *AO) SpawnProcess(data string, tags []types.Tag, s *goar.ItemSigner) (string, error) {
-	return ao.mu.SpawnProcess(data, tags, s)
+func (ao *AO) SpawnProcess(module string, data string, tags []types.Tag, s *goar.ItemSigner) (string, error) {
+	return ao.mu.SpawnProcess(module, data, tags, s)
 }
 
 func (ao *AO) SendMessage(process string, data string, tags []types.Tag, anchor string, s *goar.ItemSigner) (string, error) {
