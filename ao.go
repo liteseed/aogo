@@ -1,8 +1,6 @@
 package aogo
 
 import (
-	"errors"
-
 	"github.com/everFinance/goar"
 	"github.com/everFinance/goar/types"
 )
@@ -19,6 +17,15 @@ const (
 type AO struct {
 	mu MU
 	cu CU
+}
+
+type Message struct {
+	ID     string      `json:"Id"`
+	Target string      `json:"Target"`
+	From   string      `json:"From"`
+	Owner  string      `json:"Owner"`
+	Data   any         `json:"Data"`
+	Tags   []types.Tag `json:"Tags"`
 }
 
 func New(options ...func(*AO)) (*AO, error) {
@@ -53,14 +60,10 @@ func (ao *AO) SendMessage(process string, data string, tags []types.Tag, anchor 
 
 // CU Functions
 
-func (ao *AO) ReadResult(process string, message string) (*ReadResultResponse, error) {
-	return ao.cu.ReadResult(process, message)
+func (ao *AO) LoadResult(process string, message string) (*LoadResultResponse, error) {
+	return ao.cu.LoadResult(process, message)
 }
 
-func (ao *AO) ReadResults(process string, message string) error {
-	return errors.New("Unimplemented")
-}
-
-func (ao *AO) DryRun() error {
-	return errors.New("Unimplemented")
+func (ao *AO) DryRun(message Message) (*DryRunResponse, error) {
+	return ao.cu.DryRun(message)
 }

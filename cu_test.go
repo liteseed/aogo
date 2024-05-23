@@ -16,7 +16,7 @@ func NewCUMock(URL string) CU {
 		url:    URL,
 	}
 }
-func TestReadResult(t *testing.T) {
+func TestLoadResult(t *testing.T) {
 	process := "W7Ax6G1i3C4ksRRNP4Urxvq9bcSmwBK9J0S3QBt9J70"
 	message := "ahcFiWM5RMcXDA-OrAdpjK10Afty6qxvELa83mMbxI0"
 	messages := []map[string]any{{
@@ -64,7 +64,7 @@ func TestReadResult(t *testing.T) {
 
 	cu := NewCUMock(ts.URL)
 
-	res, err := cu.ReadResult(process, message)
+	res, err := cu.LoadResult(process, message)
 	assert.NoError(t, err)
 	assert.Equal(t, messages[0]["Target"], res.Messages[0]["Target"].(string))
 	assert.Equal(t, messages[0]["Anchor"], res.Messages[0]["Anchor"].(string))
@@ -72,3 +72,6 @@ func TestReadResult(t *testing.T) {
 	assert.ElementsMatch(t, messages[0]["Tags"], res.Messages[0]["Tags"])
 	assert.Equal(t, res.GasUsed, 599159077)
 }
+
+
+func DryRunTest(t *testing.T) {}
