@@ -64,6 +64,9 @@ func (cu *CU) DryRun(message Message) (*DryRunResponse, error) {
 		[]types.Tag{{Name: "Data-Protocol", Value: "ao"}, {Name: "Type", Value: "Message"}, {Name: "Variant", Value: "ao.TN.1"}}...,
 	)
 
+	if message.Data == "" {
+		message.Data = "1984"
+	}
 	body, err := json.Marshal(message)
 	if err != nil {
 		return nil, err
