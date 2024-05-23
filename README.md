@@ -42,25 +42,32 @@ func main() {
 
  data := []byte{1, 2, 3}
 
- //Spawn a process with some data
+ // Spawn a process with some data
+ // Note Spawn Process has some delay before the process shows up on ao.link and aos
  processId, err := ao.SpawnProcess(MODULE, data, []types.Tag{}, itemSigner)
  if err != nil {
   log.Fatal(err)
  }
  log.Println(processId)
 
- // Send a message to your AO process
- messageId, err := ao.SendMessage(processId, data, []types.Tag{{Name: "Action", Value: "Eval"}}, "", itemSigner)
- if err != nil {
+  // Send a message to your AO process
+  // Send a message to your AO process
+  messageId, err := ao.SendMessage("jysQej65l7KHRZi93csg0rvdmciJNL9hteM1N_yakpE", "", []types.Tag{{Name: "Action", Value: "Balance"}}, "", itemSigner)
+  if err != nil {
   log.Fatal(err)
  }
  log.Println(messageId)
  // Read message result
- res, err := ao.ReadResult(processId, messageId)
+ res, err := ao.LoadResult("jysQej65l7KHRZi93csg0rvdmciJNL9hteM1N_yakpE", messageId)
  if err != nil {
   log.Fatal(err)
  }
  log.Println(res)
-}
+
+ dres, err := ao.DryRun(aogo.Message{Target: "qAbHIghbi7lb0Y8KdZr8q9dvH8xwXpawCXgGSD8OpJk", Data: "sgg2DZhTFPDIpI4bpZldRpP2RCobgtUstIlcxyh5mCA", Owner: s.Owner(), From: s.Address, Tags: []types.Tag{{Name: "Action", Value: "Balance"}}})
+ if err != nil {
+  log.Fatal(err)
+ }
+ log.Println(dres.Messages[0]["Data"])
 
 ```
