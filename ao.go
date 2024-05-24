@@ -22,7 +22,6 @@ type AO struct {
 type Message struct {
 	ID     string      `json:"Id"`
 	Target string      `json:"Target"`
-	From   string      `json:"From"`
 	Owner  string      `json:"Owner"`
 	Data   any         `json:"Data"`
 	Tags   []types.Tag `json:"Tags"`
@@ -60,10 +59,10 @@ func (ao *AO) SendMessage(process string, data string, tags []types.Tag, anchor 
 
 // CU Functions
 
-func (ao *AO) LoadResult(process string, message string) (*LoadResultResponse, error) {
+func (ao *AO) LoadResult(process string, message string) (*Response, error) {
 	return ao.cu.LoadResult(process, message)
 }
 
-func (ao *AO) DryRun(message Message) (*DryRunResponse, error) {
+func (ao *AO) DryRun(message Message) (*Response, error) {
 	return ao.cu.DryRun(message)
 }

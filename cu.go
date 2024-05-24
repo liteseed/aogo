@@ -5,12 +5,14 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/everFinance/goar/types"
 )
 
 type ICU interface {
-	ReadResult(process string, message string) (*LoadResultResponse, error)
+	LoadResult(process string, message string) (*Response, error)
+	DryRun(message Message) (*Response, error)
 }
 
 type CU struct {
@@ -19,29 +21,24 @@ type CU struct {
 }
 
 func newCU(url string) CU {
+	client := &http.Client{
+		Timeout: time.Second * 10,
+	}
 	return CU{
-		client: http.DefaultClient,
+		client: client,
 		url:    url,
 	}
 }
 
-type DryRunResponse struct {
-	Messages []map[string]interface{} `json:"Messages"`
-	Spawns   []any                    `json:"Spawns"`
-	Outputs  []any                    `json:"Outputs"`
-	Error    string                   `json:"Error"`
-	GasUsed  int                      `json:"GasUsed"`
+type Response struct {
+	Messages []map[string]any `json:"Messages"`
+	Spawns   []any            `json:"Spawns"`
+	Outputs  []any            `json:"Outputs"`
+	Error    string           `json:"Error"`
+	GasUsed  int              `json:"GasUsed"`
 }
 
-type LoadResultResponse struct {
-	Messages []map[string]interface{} `json:"Messages"`
-	Spawns   []any                    `json:"Spawns"`
-	Outputs  []any                    `json:"Outputs"`
-	Error    string                   `json:"Error"`
-	GasUsed  int                      `json:"GasUsed"`
-}
-
-func (cu *CU) LoadResult(process string, message string) (*LoadResultResponse, error) {
+func (cu *CU) LoadResult(process string, message string) (*Response, error) {
 	resp, err := cu.client.Get(cu.url + "/result/" + message + "?process-id=" + process)
 	if err != nil {
 		return nil, err
@@ -50,7 +47,7 @@ func (cu *CU) LoadResult(process string, message string) (*LoadResultResponse, e
 	if err != nil {
 		return nil, err
 	}
-	var readResult LoadResultResponse
+	var readResult Response
 	err = json.Unmarshal(res, &readResult)
 	if err != nil {
 		return nil, err
@@ -58,7 +55,7 @@ func (cu *CU) LoadResult(process string, message string) (*LoadResultResponse, e
 	return &readResult, nil
 }
 
-func (cu *CU) DryRun(message Message) (*DryRunResponse, error) {
+func (cu *CU) DryRun(message Message) (*Response, error) {
 	message.Tags = append(
 		message.Tags,
 		[]types.Tag{{Name: "Data-Protocol", Value: "ao"}, {Name: "Type", Value: "Message"}, {Name: "Variant", Value: "ao.TN.1"}}...,
@@ -86,7 +83,7 @@ func (cu *CU) DryRun(message Message) (*DryRunResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	var dryRun DryRunResponse
+	var dryRun Response
 	err = json.Unmarshal(res, &dryRun)
 	if err != nil {
 		return nil, err

@@ -51,7 +51,6 @@ func main() {
  log.Println(processId)
 
   // Send a message to your AO process
-  // Send a message to your AO process
   messageId, err := ao.SendMessage("jysQej65l7KHRZi93csg0rvdmciJNL9hteM1N_yakpE", "", []types.Tag{{Name: "Action", Value: "Balance"}}, "", itemSigner)
   if err != nil {
   log.Fatal(err)

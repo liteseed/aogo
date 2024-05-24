@@ -2,9 +2,11 @@ package aogo
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/everFinance/goar"
 	"github.com/everFinance/goar/types"
@@ -23,15 +25,19 @@ type MU struct {
 
 func newMU(url string) MU {
 	return MU{
-		client: http.DefaultClient,
-		url:    url,
+		client: &http.Client{
+			Timeout: time.Second * 10,
+		},
+		url: url,
 	}
 }
 
+type SendMessageResponse struct {
+	Message string `json:"message"`
+	ID      string `json:"id"`
+}
+
 func (mu MU) SendMessage(process string, data string, tags []types.Tag, anchor string, s *goar.ItemSigner) (string, error) {
-	if data == "" {
-		data = "1984"
-	}
 	tags = append(tags, types.Tag{Name: "Data-Protocol", Value: "ao"})
 	tags = append(tags, types.Tag{Name: "Variant", Value: "ao.TN.1"})
 	tags = append(tags, types.Tag{Name: "Type", Value: "Message"})
@@ -40,15 +46,34 @@ func (mu MU) SendMessage(process string, data string, tags []types.Tag, anchor s
 	if err != nil {
 		return "", err
 	}
-	resp, err := mu.client.Post(mu.url, "application/octet-stream", bytes.NewBuffer(dataItem.ItemBinary))
+
+	req, err := http.NewRequest("POST", mu.url, bytes.NewBuffer(dataItem.ItemBinary))
 	if err != nil {
 		return "", err
 	}
-	_, err = io.ReadAll(resp.Body)
+	req.Header.Set("content-type", "application/octet-stream")
+	req.Header.Set("accept", "application/json")
+
+	resp, err := mu.client.Do(req)
 	if err != nil {
 		return "", err
 	}
-	return dataItem.Id, nil
+
+	if resp.StatusCode >= 400 {
+		return "", errors.New("message failed: " + resp.Status)
+	}
+
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	var res SendMessageResponse
+	err = json.Unmarshal(b, &res)
+	if err != nil {
+		return "", err
+	}
+
+	return res.ID, nil
 }
 
 func (mu MU) SpawnProcess(module string, data string, tags []types.Tag, s *goar.ItemSigner) (string, error) {
@@ -68,11 +93,12 @@ func (mu MU) SpawnProcess(module string, data string, tags []types.Tag, s *goar.
 	}
 
 	req, err := http.NewRequest("POST", mu.url, bytes.NewBuffer(dataItem.ItemBinary))
-	req.Header.Set("content-type", "application/octet-stream")
-	req.Header.Set("accept", "application/json")
 	if err != nil {
 		return "", err
 	}
+	req.Header.Set("content-type", "application/octet-stream")
+	req.Header.Set("accept", "application/json")
+
 	resp, err := mu.client.Do(req)
 	if err != nil {
 		return "", err
