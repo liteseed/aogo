@@ -38,6 +38,10 @@ type SendMessageResponse struct {
 	ID      string `json:"id"`
 }
 
+type SpawnProcessResponse struct {
+	ID string `json:"id"`
+}
+
 func (mu MU) SendMessage(process string, data string, tags []types.Tag, anchor string, s *signer.Signer) (string, error) {
 	tags = append(tags, types.Tag{Name: "Data-Protocol", Value: "ao"})
 	tags = append(tags, types.Tag{Name: "Variant", Value: "ao.TN.1"})
@@ -114,10 +118,18 @@ func (mu MU) SpawnProcess(module string, data string, tags []types.Tag, s *signe
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 202 {
+	if resp.StatusCode >= 400 {
 		return "", errors.New(resp.Status)
 	}
-	return dataItem.ID, nil
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	var res SpawnProcessResponse
+	err = json.Unmarshal(b, &res)
+	if err != nil {
+		return "", err
+	}
+
+	return res.ID, nil
 }

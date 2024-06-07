@@ -25,11 +25,15 @@ func TestSendMessage0(t *testing.T) {
 
 	s, err := signer.FromPath("./keys/wallet.json")
 	assert.NoError(t, err)
+	muServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, http.MethodPost, r.Method)
+		w.WriteHeader(http.StatusOK)
+		_, err := w.Write([]byte(`{"id": "mockMessageID"}`))
+		assert.NoError(t, err)
+	}))
+	defer muServer.Close()
 
-	ts := httptest.NewServer(nil)
-	defer ts.Close()
-
-	mu := NewMUMock(ts.URL)
+	mu := NewMUMock(muServer.URL)
 	res, err := mu.SendMessage(process, data, tags, "", s)
 	assert.NoError(t, err)
 	assert.True(t, res != "")
@@ -39,29 +43,38 @@ func TestSendMessage1(t *testing.T) {
 	muServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodPost, r.Method)
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"id": "mockMessageID"}`))
+		_, err := w.Write([]byte(`{"id": "mockMessageID"}`))
+		assert.NoError(t, err)
 	}))
 	defer muServer.Close()
 
 	ao := &AO{mu: newMU(muServer.URL)}
 
-	signer := signer.FromPath("./keys/arweave.json") // Mock signer or use a real one for the test
+	signer, err := signer.FromPath("./keys/wallet.json") // Mock signer or use a real one for the test
+	assert.NoError(t, err)
+
 	id, err := ao.SendMessage("process", "data", nil, "", signer)
 	assert.NoError(t, err)
 	assert.Equal(t, "mockMessageID", id)
 }
 
 func TestSpawnProcess0(t *testing.T) {
+	muServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, http.MethodPost, r.Method)
+		w.WriteHeader(http.StatusAccepted)
+		_, err := w.Write([]byte(`{"id": "mockMessageID"}`))
+		assert.NoError(t, err)
+	}))
+	defer muServer.Close()
+
+	mu := NewMUMock(muServer.URL)
+
 	data := ""
 	tags := []types.Tag{{Name: "Action", Value: "Stakers"}}
 
 	s, err := signer.FromPath("./keys/wallet.json")
 	assert.NoError(t, err)
 
-	ts := httptest.NewServer(nil)
-	defer ts.Close()
-
-	mu := NewMUMock(ts.URL)
 	res, err := mu.SpawnProcess("", data, tags, s)
 
 	assert.NoError(t, err)
@@ -72,13 +85,16 @@ func TestSpawnProcess1(t *testing.T) {
 	muServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodPost, r.Method)
 		w.WriteHeader(http.StatusAccepted)
-		w.Write([]byte(`{"id": "mockProcessID"}`))
+		_, err :=  w.Write([]byte(`{"id": "mockProcessID"}`))
+		assert.NoError(t, err)
 	}))
 	defer muServer.Close()
 
 	ao := &AO{mu: newMU(muServer.URL)}
 
-	signer := signer.FromPath("./keys/arweave.json") // Mock signer or use a real one for the test
+	signer, err := signer.FromPath("./keys/wallet.json") // Mock signer or use a real one for the test
+	assert.NoError(t, err)
+
 	id, err := ao.SpawnProcess("module", "data", nil, signer)
 	assert.NoError(t, err)
 	assert.Equal(t, "mockProcessID", id)
