@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	"github.com/everFinance/goar"
-	"github.com/everFinance/goar/types"
+	"github.com/liteseed/goar/signer"
+	"github.com/liteseed/goar/types"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,17 +23,14 @@ func TestSendMessage(t *testing.T) {
 	data := ""
 	tags := []types.Tag{{Name: "Action", Value: "Stakers"}}
 
-	s, err := goar.NewSignerFromPath("./keys/wallet.json")
-	assert.NoError(t, err)
-
-	itemSigner, err := goar.NewItemSigner(s)
+	s, err := signer.FromPath("./keys/wallet.json")
 	assert.NoError(t, err)
 
 	ts := httptest.NewServer(nil)
 	defer ts.Close()
 
 	mu := NewMUMock(ts.URL)
-	res, err := mu.SendMessage(process, data, tags, "", itemSigner)
+	res, err := mu.SendMessage(process, data, tags, "", s)
 	assert.NoError(t, err)
 	assert.True(t, res != "")
 }
@@ -42,17 +39,14 @@ func TestSpawnProcess(t *testing.T) {
 	data := ""
 	tags := []types.Tag{{Name: "Action", Value: "Stakers"}}
 
-	s, err := goar.NewSignerFromPath("./keys/wallet.json")
-	assert.NoError(t, err)
-
-	itemSigner, err := goar.NewItemSigner(s)
+	s, err := signer.FromPath("./keys/wallet.json")
 	assert.NoError(t, err)
 
 	ts := httptest.NewServer(nil)
 	defer ts.Close()
 
 	mu := NewMUMock(ts.URL)
-	res, err := mu.SpawnProcess("", data, tags, itemSigner)
+	res, err := mu.SpawnProcess("", data, tags, s)
 
 	assert.NoError(t, err)
 	assert.True(t, res != "")

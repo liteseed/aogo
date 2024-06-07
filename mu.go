@@ -8,13 +8,14 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/everFinance/goar"
-	"github.com/everFinance/goar/types"
+	"github.com/liteseed/goar/signer"
+	"github.com/liteseed/goar/tx"
+	"github.com/liteseed/goar/types"
 )
 
 type IMU interface {
-	SendMessage(process string, data string, tags []types.Tag, s *goar.ItemSigner) (string, error)
-	SpawnProcess(data string, tags []types.Tag, s *goar.ItemSigner) (string, error)
+	SendMessage(process string, data string, tags []types.Tag, s *signer.Signer) (string, error)
+	SpawnProcess(data string, tags []types.Tag, s *signer.Signer) (string, error)
 
 	Monitor()
 }
@@ -37,17 +38,23 @@ type SendMessageResponse struct {
 	ID      string `json:"id"`
 }
 
-func (mu MU) SendMessage(process string, data string, tags []types.Tag, anchor string, s *goar.ItemSigner) (string, error) {
+func (mu MU) SendMessage(process string, data string, tags []types.Tag, anchor string, s *signer.Signer) (string, error) {
 	tags = append(tags, types.Tag{Name: "Data-Protocol", Value: "ao"})
 	tags = append(tags, types.Tag{Name: "Variant", Value: "ao.TN.1"})
 	tags = append(tags, types.Tag{Name: "Type", Value: "Message"})
 	tags = append(tags, types.Tag{Name: "SDK", Value: SDK})
-	dataItem, err := s.CreateAndSignItem([]byte(data), process, anchor, tags)
+
+	dataItem, err := tx.NewDataItem([]byte(data), process, anchor, tags)
 	if err != nil {
 		return "", err
 	}
 
-	req, err := http.NewRequest("POST", mu.url, bytes.NewBuffer(dataItem.ItemBinary))
+	err = s.SignDataItem(dataItem)
+	if err != nil {
+		return "", err
+	}
+
+	req, err := http.NewRequest("POST", mu.url, bytes.NewBuffer(dataItem.Raw))
 	if err != nil {
 		return "", err
 	}
@@ -76,7 +83,7 @@ func (mu MU) SendMessage(process string, data string, tags []types.Tag, anchor s
 	return res.ID, nil
 }
 
-func (mu MU) SpawnProcess(module string, data string, tags []types.Tag, s *goar.ItemSigner) (string, error) {
+func (mu MU) SpawnProcess(module string, data string, tags []types.Tag, s *signer.Signer) (string, error) {
 	if data == "" {
 		data = "1984"
 	}
@@ -87,12 +94,16 @@ func (mu MU) SpawnProcess(module string, data string, tags []types.Tag, s *goar.
 	tags = append(tags, types.Tag{Name: "Module", Value: module})
 	tags = append(tags, types.Tag{Name: "SDK", Value: SDK})
 
-	dataItem, err := s.CreateAndSignItem([]byte(data), "", "", tags)
+	dataItem, err := tx.NewDataItem([]byte(data), "", "", tags)
 	if err != nil {
 		return "", err
 	}
 
-	req, err := http.NewRequest("POST", mu.url, bytes.NewBuffer(dataItem.ItemBinary))
+	err = s.SignDataItem(dataItem)
+	if err != nil {
+		return "", err
+	}
+	req, err := http.NewRequest("POST", mu.url, bytes.NewBuffer(dataItem.Raw))
 	if err != nil {
 		return "", err
 	}
@@ -108,5 +119,5 @@ func (mu MU) SpawnProcess(module string, data string, tags []types.Tag, s *goar.
 	if resp.StatusCode != 202 {
 		return "", errors.New(resp.Status)
 	}
-	return dataItem.Id, nil
+	return dataItem.ID, nil
 }

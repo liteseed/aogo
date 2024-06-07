@@ -1,8 +1,8 @@
 package aogo
 
 import (
-	"github.com/everFinance/goar"
-	"github.com/everFinance/goar/types"
+	"github.com/liteseed/goar/signer"
+	"github.com/liteseed/goar/types"
 )
 
 const (
@@ -49,11 +49,11 @@ func WthCU(url string) func(*AO) {
 
 // MU Functions
 
-func (ao *AO) SpawnProcess(module string, data string, tags []types.Tag, s *goar.ItemSigner) (string, error) {
+func (ao *AO) SpawnProcess(module string, data string, tags []types.Tag, s *signer.Signer) (string, error) {
 	return ao.mu.SpawnProcess(module, data, tags, s)
 }
 
-func (ao *AO) SendMessage(process string, data string, tags []types.Tag, anchor string, s *goar.ItemSigner) (string, error) {
+func (ao *AO) SendMessage(process string, data string, tags []types.Tag, anchor string, s *signer.Signer) (string, error) {
 	return ao.mu.SendMessage(process, data, tags, anchor, s)
 }
 

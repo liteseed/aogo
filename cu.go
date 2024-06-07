@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/everFinance/goar/types"
+	"github.com/liteseed/goar/types"
 )
 
 type ICU interface {
