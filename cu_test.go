@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 
+	"github.com/liteseed/goar/types"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,7 +17,7 @@ func NewCUMock(URL string) CU {
 		url:    URL,
 	}
 }
-func TestLoadResult(t *testing.T) {
+func TestLoadResult0(t *testing.T) {
 	process := "W7Ax6G1i3C4ksRRNP4Urxvq9bcSmwBK9J0S3QBt9J70"
 	message := "ahcFiWM5RMcXDA-OrAdpjK10Afty6qxvELa83mMbxI0"
 	messages := []map[string]any{{
@@ -73,5 +74,42 @@ func TestLoadResult(t *testing.T) {
 	assert.Equal(t, res.GasUsed, 599159077)
 }
 
+func TestLoadResult1(t *testing.T) {
+	cuServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, http.MethodGet, r.Method)
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"Messages": [], "Spawns": [], "Outputs": [], "Error": "", "GasUsed": 0}`))
+	}))
+	defer cuServer.Close()
 
-func DryRunTest(t *testing.T) {}
+	ao := &AO{cu: newCU(cuServer.URL)}
+
+	resp, err := ao.LoadResult("process", "message")
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.Equal(t, 0, resp.GasUsed)
+}
+
+func TestDryRun(t *testing.T) {
+	cuServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, http.MethodPost, r.Method)
+		w.WriteHeader(http.StatusOK)
+		_, err := w.Write([]byte(`{"Messages": [], "Spawns": [], "Outputs": [], "Error": "", "GasUsed": 0}`))
+		assert.NoError(t, err)
+	}))
+	defer cuServer.Close()
+
+	ao := &AO{cu: newCU(cuServer.URL)}
+
+	message := Message{
+		ID:     "testID",
+		Target: "testTarget",
+		Owner:  "testOwner",
+		Data:   "testData",
+		Tags:   []types.Tag{},
+	}
+	resp, err := ao.DryRun(message)
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.Equal(t, 0, resp.GasUsed)
+}
