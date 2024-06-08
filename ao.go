@@ -15,8 +15,8 @@ const (
 )
 
 type AO struct {
-	mu MU
-	cu CU
+	mu IMU
+	cu ICU
 }
 
 type Message struct {
@@ -35,13 +35,13 @@ func New(options ...func(*AO)) (*AO, error) {
 	return ao, nil
 }
 
-func WthMU(url string) func(*AO) {
+func WithMU(url string) func(*AO) {
 	return func(ao *AO) {
 		ao.mu = newMU(url)
 	}
 }
 
-func WthCU(url string) func(*AO) {
+func WithCU(url string) func(*AO) {
 	return func(ao *AO) {
 		ao.cu = newCU(url)
 	}

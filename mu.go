@@ -14,18 +14,18 @@ import (
 )
 
 type IMU interface {
-	SendMessage(process string, data string, tags []types.Tag, s *signer.Signer) (string, error)
-	SpawnProcess(data string, tags []types.Tag, s *signer.Signer) (string, error)
-
+	SendMessage(process string, data string, tags []types.Tag, anchor string, s *signer.Signer) (string, error)
+	SpawnProcess(module string, data string, tags []types.Tag, s *signer.Signer) (string, error)
 	Monitor()
 }
+
 type MU struct {
 	client *http.Client
 	url    string
 }
 
-func newMU(url string) MU {
-	return MU{
+func newMU(url string) *MU {
+	return &MU{
 		client: &http.Client{
 			Timeout: time.Second * 10,
 		},
@@ -42,7 +42,7 @@ type SpawnProcessResponse struct {
 	ID string `json:"id"`
 }
 
-func (mu MU) SendMessage(process string, data string, tags []types.Tag, anchor string, s *signer.Signer) (string, error) {
+func (mu *MU) SendMessage(process string, data string, tags []types.Tag, anchor string, s *signer.Signer) (string, error) {
 	tags = append(tags, types.Tag{Name: "Data-Protocol", Value: "ao"})
 	tags = append(tags, types.Tag{Name: "Variant", Value: "ao.TN.1"})
 	tags = append(tags, types.Tag{Name: "Type", Value: "Message"})
@@ -87,7 +87,7 @@ func (mu MU) SendMessage(process string, data string, tags []types.Tag, anchor s
 	return res.ID, nil
 }
 
-func (mu MU) SpawnProcess(module string, data string, tags []types.Tag, s *signer.Signer) (string, error) {
+func (mu *MU) SpawnProcess(module string, data string, tags []types.Tag, s *signer.Signer) (string, error) {
 	if data == "" {
 		data = "1984"
 	}
@@ -132,4 +132,8 @@ func (mu MU) SpawnProcess(module string, data string, tags []types.Tag, s *signe
 	}
 
 	return res.ID, nil
+}
+
+func (mu *MU) Monitor() {
+	// optionally, monitoring logic...
 }

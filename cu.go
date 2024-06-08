@@ -20,11 +20,11 @@ type CU struct {
 	url    string
 }
 
-func newCU(url string) CU {
+func newCU(url string) *CU {
 	client := &http.Client{
 		Timeout: time.Second * 10,
 	}
-	return CU{
+	return &CU{
 		client: client,
 		url:    url,
 	}
