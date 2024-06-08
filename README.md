@@ -51,6 +51,7 @@ func main() {
   log.Fatal(err)
  }
  log.Println(mID)
+
  // Read message result
  res, err := ao.LoadResult("jysQej65l7KHRZi93csg0rvdmciJNL9hteM1N_yakpE", messageId)
  if err != nil {
@@ -58,6 +59,7 @@ func main() {
  }
  log.Println(res)
 
+ // DryRun a Message and get it's result 
  dres, err := ao.DryRun(aogo.Message{Target: "qAbHIghbi7lb0Y8KdZr8q9dvH8xwXpawCXgGSD8OpJk", Data: "sgg2DZhTFPDIpI4bpZldRpP2RCobgtUstIlcxyh5mCA", Owner: s.Owner(), From: s.Address, Tags: []types.Tag{{Name: "Action", Value: "Balance"}}})
  if err != nil {
   log.Fatal(err)
