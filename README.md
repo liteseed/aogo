@@ -39,7 +39,7 @@ func main() {
 
  // Spawn a process with some data
  // Note: Spawn Process has some delay before the process shows up on ao.link and aos
- pID, err := ao.SpawnProcess(MODULE, data, []types.Tag{}, itemSigner)
+ pID, err := ao.SpawnProcess(MODULE, data, []types.Tag{}, s)
  if err != nil {
   log.Fatal(err)
  }
