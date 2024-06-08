@@ -13,8 +13,8 @@ import (
  "log"
  "os"
 
- "github.com/everFinance/goar"
- "github.com/everFinance/goar/types"
+ "github.com/liteseed/goar/signer"
+ "github.com/liteseed/goar/types"
  "github.com/liteseed/aogo"
 )
 
@@ -24,12 +24,7 @@ const MODULE = "1PdCJiXhNafpJbvC-sjxWTeNzbf9Q_RfUNs84GYoPm0"
 func main() {
 
  // Make a Signer
- s, err := goar.NewSignerFromPath("./keys/wallet.json")
- if err != nil {
-  log.Fatal(err)
- }
- itemSigner, err := goar.NewItemSigner(s)
- // Initialize an AO Struct
+ s, err := signer.FromPath("./wallet.json")
  if err != nil {
   log.Fatal(err)
  }
@@ -43,19 +38,19 @@ func main() {
  data := []byte{1, 2, 3}
 
  // Spawn a process with some data
- // Note Spawn Process has some delay before the process shows up on ao.link and aos
- processId, err := ao.SpawnProcess(MODULE, data, []types.Tag{}, itemSigner)
+ // Note: Spawn Process has some delay before the process shows up on ao.link and aos
+ pID, err := ao.SpawnProcess(MODULE, data, []types.Tag{}, itemSigner)
  if err != nil {
   log.Fatal(err)
  }
- log.Println(processId)
+ log.Println(pID)
 
   // Send a message to your AO process
-  messageId, err := ao.SendMessage("jysQej65l7KHRZi93csg0rvdmciJNL9hteM1N_yakpE", "", []types.Tag{{Name: "Action", Value: "Balance"}}, "", itemSigner)
+  mID, err := ao.SendMessage("jysQej65l7KHRZi93csg0rvdmciJNL9hteM1N_yakpE", "", []types.Tag{{Name: "Action", Value: "Balance"}}, "", s)
   if err != nil {
   log.Fatal(err)
  }
- log.Println(messageId)
+ log.Println(mID)
  // Read message result
  res, err := ao.LoadResult("jysQej65l7KHRZi93csg0rvdmciJNL9hteM1N_yakpE", messageId)
  if err != nil {
