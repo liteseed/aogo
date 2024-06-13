@@ -42,7 +42,7 @@ type SpawnProcessResponse struct {
 	ID string `json:"id"`
 }
 
-func (mu MU) SendMessage(process string, data string, tags []tag.Tag, anchor string, s *signer.Signer) (string, error) {
+func (mu *MU) SendMessage(process string, data string, tags []tag.Tag, anchor string, s *signer.Signer) (string, error) {
 	tags = append(tags, tag.Tag{Name: "Data-Protocol", Value: "ao"})
 	tags = append(tags, tag.Tag{Name: "Variant", Value: "ao.TN.1"})
 	tags = append(tags, tag.Tag{Name: "Type", Value: "Message"})
@@ -83,7 +83,7 @@ func (mu MU) SendMessage(process string, data string, tags []tag.Tag, anchor str
 	return res.ID, nil
 }
 
-func (mu MU) SpawnProcess(module string, data string, tags []tag.Tag, s *signer.Signer) (string, error) {
+func (mu *MU) SpawnProcess(module string, data string, tags []tag.Tag, s *signer.Signer) (string, error) {
 	if data == "" {
 		data = "1984"
 	}
