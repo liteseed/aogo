@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 
 	"github.com/liteseed/goar/signer"
-	"github.com/liteseed/goar/types"
+	"github.com/liteseed/goar/tag"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -21,7 +21,7 @@ func NewMUMock(URL string) MU {
 func TestSendMessage0(t *testing.T) {
 	process := "yugMfaR-u_11GkAuZhqeChPuzoxVYuJW8RnNCIby-D8"
 	data := ""
-	tags := []types.Tag{{Name: "Action", Value: "Stakers"}}
+	tags := []tag.Tag{{Name: "Action", Value: "Stakers"}}
 
 	s, err := signer.FromPath("./keys/wallet.json")
 	assert.NoError(t, err)
@@ -70,7 +70,7 @@ func TestSpawnProcess0(t *testing.T) {
 	mu := NewMUMock(muServer.URL)
 
 	data := ""
-	tags := []types.Tag{{Name: "Action", Value: "Stakers"}}
+	tags := []tag.Tag{{Name: "Action", Value: "Stakers"}}
 
 	s, err := signer.FromPath("./keys/wallet.json")
 	assert.NoError(t, err)

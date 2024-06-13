@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	"github.com/liteseed/goar/types"
+	"github.com/liteseed/goar/tag"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -106,7 +106,7 @@ func TestDryRun(t *testing.T) {
 		Target: "testTarget",
 		Owner:  "testOwner",
 		Data:   "testData",
-		Tags:   []types.Tag{},
+		Tags:   []tag.Tag{},
 	}
 	resp, err := ao.DryRun(message)
 	assert.NoError(t, err)

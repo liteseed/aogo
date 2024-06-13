@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/liteseed/goar/types"
+	"github.com/liteseed/goar/tag"
 )
 
 type ICU interface {
@@ -58,7 +58,7 @@ func (cu *CU) LoadResult(process string, message string) (*Response, error) {
 func (cu *CU) DryRun(message Message) (*Response, error) {
 	message.Tags = append(
 		message.Tags,
-		[]types.Tag{{Name: "Data-Protocol", Value: "ao"}, {Name: "Type", Value: "Message"}, {Name: "Variant", Value: "ao.TN.1"}}...,
+		[]tag.Tag{{Name: "Data-Protocol", Value: "ao"}, {Name: "Type", Value: "Message"}, {Name: "Variant", Value: "ao.TN.1"}}...,
 	)
 
 	if message.Data == "" {
