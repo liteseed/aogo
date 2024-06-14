@@ -6,7 +6,6 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"time"
 
 	"github.com/liteseed/goar/signer"
 	"github.com/liteseed/goar/tag"
@@ -26,10 +25,8 @@ type MU struct {
 
 func newMU(url string) MU {
 	return MU{
-		client: &http.Client{
-			Timeout: time.Second * 10,
-		},
-		url: url,
+		client: http.DefaultClient,
+		url:    url,
 	}
 }
 

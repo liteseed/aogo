@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"time"
 
 	"github.com/liteseed/goar/tag"
 )
@@ -21,11 +20,8 @@ type CU struct {
 }
 
 func newCU(url string) CU {
-	client := &http.Client{
-		Timeout: time.Second * 10,
-	}
 	return CU{
-		client: client,
+		client: http.DefaultClient,
 		url:    url,
 	}
 }
