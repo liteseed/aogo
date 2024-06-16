@@ -20,10 +20,10 @@ type AO struct {
 }
 
 type Message struct {
-	ID     string    `json:"Id"`
-	Target string    `json:"Target"`
-	Owner  string    `json:"Owner"`
-	Data   any       `json:"Data"`
+	ID     string      `json:"Id"`
+	Target string      `json:"Target"`
+	Owner  string      `json:"Owner"`
+	Data   any         `json:"Data"`
 	Tags   []tag.Tag `json:"Tags"`
 }
 
