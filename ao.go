@@ -2,7 +2,7 @@ package aogo
 
 import (
 	"github.com/liteseed/goar/signer"
-	"github.com/liteseed/goar/types"
+	"github.com/liteseed/goar/tag"
 )
 
 const (
@@ -15,16 +15,16 @@ const (
 )
 
 type AO struct {
-	mu IMU
-	cu ICU
+	mu MU
+	cu CU
 }
 
 type Message struct {
-	ID     string      `json:"Id"`
-	Target string      `json:"Target"`
-	Owner  string      `json:"Owner"`
-	Data   any         `json:"Data"`
-	Tags   []types.Tag `json:"Tags"`
+	ID     string    `json:"Id"`
+	Target string    `json:"Target"`
+	Owner  string    `json:"Owner"`
+	Data   any       `json:"Data"`
+	Tags   []tag.Tag `json:"Tags"`
 }
 
 func New(options ...func(*AO)) (*AO, error) {
@@ -35,13 +35,13 @@ func New(options ...func(*AO)) (*AO, error) {
 	return ao, nil
 }
 
-func WithMU(url string) func(*AO) {
+func WthMU(url string) func(*AO) {
 	return func(ao *AO) {
 		ao.mu = newMU(url)
 	}
 }
 
-func WithCU(url string) func(*AO) {
+func WthCU(url string) func(*AO) {
 	return func(ao *AO) {
 		ao.cu = newCU(url)
 	}
@@ -49,11 +49,11 @@ func WithCU(url string) func(*AO) {
 
 // MU Functions
 
-func (ao *AO) SpawnProcess(module string, data string, tags []types.Tag, s *signer.Signer) (string, error) {
+func (ao *AO) SpawnProcess(module string, data string, tags []tag.Tag, s *signer.Signer) (string, error) {
 	return ao.mu.SpawnProcess(module, data, tags, s)
 }
 
-func (ao *AO) SendMessage(process string, data string, tags []types.Tag, anchor string, s *signer.Signer) (string, error) {
+func (ao *AO) SendMessage(process string, data string, tags []tag.Tag, anchor string, s *signer.Signer) (string, error) {
 	return ao.mu.SendMessage(process, data, tags, anchor, s)
 }
 

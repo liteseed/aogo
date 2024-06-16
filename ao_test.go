@@ -1,104 +1,109 @@
 package aogo
 
 import (
+	//"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/liteseed/goar/signer"
-	"github.com/liteseed/goar/types"
+	"github.com/liteseed/goar/tag"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
 
-// MockMU is a mock implementation of the IMU interface
-type MockMU struct {
-	mock.Mock
+func NewAOMock(CUURL, MUURL string) *AO {
+	return &AO{
+		cu: newCU(CUURL),
+		mu: newMU(MUURL),
+	}
 }
 
-func (m *MockMU) SendMessage(process string, data string, tags []types.Tag, anchor string, s *signer.Signer) (string, error) {
-	args := m.Called(process, data, tags, anchor, s)
-	return args.String(0), args.Error(1)
-}
+func TestSpawnProcess_AO(t *testing.T) {
+	muServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, http.MethodPost, r.Method)
+		w.WriteHeader(http.StatusOK)
+		_, err := w.Write([]byte(`{"id": "mockProcessID"}`))
+		assert.NoError(t, err)
+	}))
+	defer muServer.Close()
 
-func (m *MockMU) SpawnProcess(module string, data string, tags []types.Tag, s *signer.Signer) (string, error) {
-	args := m.Called(module, data, tags, s)
-	return args.String(0), args.Error(1)
-}
+	ao := NewAOMock(CU_URL, muServer.URL)
 
-func (m *MockMU) Monitor() {
-	m.Called()
-}
+	data := "test data"
+	tags := []tag.Tag{{Name: "TestTag", Value: "TestValue"}}
 
-// MockCU is a mock implementation of the ICU interface
-type MockCU struct {
-	mock.Mock
-}
-
-func (m *MockCU) LoadResult(process string, message string) (*Response, error) {
-	args := m.Called(process, message)
-	return args.Get(0).(*Response), args.Error(1)
-}
-
-func (m *MockCU) DryRun(message Message) (*Response, error) {
-	args := m.Called(message)
-	return args.Get(0).(*Response), args.Error(1)
-}
-
-func TestNewAO(t *testing.T) {
-	ao, err := New()
+	s, err := signer.FromPath("./keys/wallet.json")
 	assert.NoError(t, err)
-	assert.NotNil(t, ao)
-	assert.NotNil(t, ao.mu)
-	assert.NotNil(t, ao.cu)
+
+	id, err := ao.SpawnProcess("testModule", data, tags, s)
+	assert.NoError(t, err)
+	assert.Equal(t, "mockProcessID", id)
 }
 
-func TestNewAOWithCustomMU(t *testing.T) {
-	customURL := "https://custom-mu.url"
-	ao, err := New(WithMU(customURL))
+func TestSendMessage_AO(t *testing.T) {
+	muServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, http.MethodPost, r.Method)
+		w.WriteHeader(http.StatusOK)
+		_, err := w.Write([]byte(`{"id": "mockMessageID"}`))
+		assert.NoError(t, err)
+	}))
+	defer muServer.Close()
+
+	ao := NewAOMock(CU_URL, muServer.URL)
+
+	process := "testProcess"
+	data := "testData"
+	tags := []tag.Tag{{Name: "TestTag", Value: "TestValue"}}
+
+	s, err := signer.FromPath("./keys/wallet.json")
 	assert.NoError(t, err)
-	assert.Equal(t, customURL, ao.mu.(*MU).url)
+
+	id, err := ao.SendMessage(process, data, tags, "", s)
+	assert.NoError(t, err)
+	assert.Equal(t, "mockMessageID", id)
 }
 
-func TestNewAOWithCustomCU(t *testing.T) {
-	customURL := "https://custom-cu.url"
-	ao, err := New(WithCU(customURL))
+func TestLoadResult_AO(t *testing.T) {
+	cuServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, http.MethodGet, r.Method)
+		w.WriteHeader(http.StatusOK)
+		_, err := w.Write([]byte(`{"Messages": [], "Spawns": [], "Outputs": [], "Error": "", "GasUsed": 0}`))
+		assert.NoError(t, err)
+	}))
+	defer cuServer.Close()
+
+	ao := NewAOMock(cuServer.URL, MU_URL)
+
+	process := "testProcess"
+	message := "testMessage"
+
+	resp, err := ao.LoadResult(process, message)
 	assert.NoError(t, err)
-	assert.Equal(t, customURL, ao.cu.(*CU).url)
+	assert.NotNil(t, resp)
+	assert.Equal(t, 0, resp.GasUsed)
 }
 
-func TestSpawnProcess(t *testing.T) {
-	mockMU := new(MockMU)
-	ao := &AO{mu: mockMU, cu: newCU(CU_URL)}
-	mockSigner := &signer.Signer{}
-	mockTags := []types.Tag{}
-	mockMU.On("SpawnProcess", "testModule", "testData", mockTags, mockSigner).Return("processID", nil)
+func TestDryRun_AO(t *testing.T) {
+	cuServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, http.MethodPost, r.Method)
+		w.WriteHeader(http.StatusOK)
+		_, err := w.Write([]byte(`{"Messages": [], "Spawns": [], "Outputs": [], "Error": "", "GasUsed": 0}`))
+		assert.NoError(t, err)
+	}))
+	defer cuServer.Close()
 
-	processID, err := ao.SpawnProcess("testModule", "testData", mockTags, mockSigner)
+	ao := NewAOMock(cuServer.URL, MU_URL)
+
+	message := Message{
+		ID:     "testID",
+		Target: "testTarget",
+		Owner:  "testOwner",
+		Data:   "testData",
+		Tags:   []tag.Tag{},
+	}
+
+	resp, err := ao.DryRun(message)
 	assert.NoError(t, err)
-	assert.Equal(t, "processID", processID)
-	mockMU.AssertExpectations(t)
-}
-
-func TestSendMessage(t *testing.T) {
-	mockMU := new(MockMU)
-	ao := &AO{mu: mockMU, cu: newCU(CU_URL)}
-	mockSigner := &signer.Signer{}
-	mockTags := []types.Tag{}
-	mockMU.On("SendMessage", "testProcess", "testData", mockTags, "", mockSigner).Return("messageID", nil)
-
-	messageID, err := ao.SendMessage("testProcess", "testData", mockTags, "", mockSigner)
-	assert.NoError(t, err)
-	assert.Equal(t, "messageID", messageID)
-	mockMU.AssertExpectations(t)
-}
-
-func TestLoadResult(t *testing.T) {
-	mockCU := new(MockCU)
-	ao := &AO{mu: newMU(MU_URL), cu: mockCU}
-	mockResponse := &Response{}
-	mockCU.On("LoadResult", "testProcess", "testMessage").Return(mockResponse, nil)
-
-	response, err := ao.LoadResult("testProcess", "testMessage")
-	assert.NoError(t, err)
-	assert.Equal(t, mockResponse, response)
-	mockCU.AssertExpectations(t)
+	assert.NotNil(t, resp)
+	assert.Equal(t, 0, resp.GasUsed)
 }

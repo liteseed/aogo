@@ -6,30 +6,27 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"time"
 
 	"github.com/liteseed/goar/signer"
-	"github.com/liteseed/goar/tx"
-	"github.com/liteseed/goar/types"
+	"github.com/liteseed/goar/tag"
+	"github.com/liteseed/goar/transaction/data_item"
 )
 
 type IMU interface {
-	SendMessage(process string, data string, tags []types.Tag, anchor string, s *signer.Signer) (string, error)
-	SpawnProcess(module string, data string, tags []types.Tag, s *signer.Signer) (string, error)
+	SendMessage(process string, data string, tags []tag.Tag, s *signer.Signer) (string, error)
+	SpawnProcess(data string, tags []tag.Tag, s *signer.Signer) (string, error)
+
 	Monitor()
 }
-
 type MU struct {
 	client *http.Client
 	url    string
 }
 
-func newMU(url string) *MU {
-	return &MU{
-		client: &http.Client{
-			Timeout: time.Second * 10,
-		},
-		url: url,
+func newMU(url string) MU {
+	return MU{
+		client: http.DefaultClient,
+		url:    url,
 	}
 }
 
@@ -42,18 +39,14 @@ type SpawnProcessResponse struct {
 	ID string `json:"id"`
 }
 
-func (mu *MU) SendMessage(process string, data string, tags []types.Tag, anchor string, s *signer.Signer) (string, error) {
-	tags = append(tags, types.Tag{Name: "Data-Protocol", Value: "ao"})
-	tags = append(tags, types.Tag{Name: "Variant", Value: "ao.TN.1"})
-	tags = append(tags, types.Tag{Name: "Type", Value: "Message"})
-	tags = append(tags, types.Tag{Name: "SDK", Value: SDK})
+func (mu *MU) SendMessage(process string, data string, tags []tag.Tag, anchor string, s *signer.Signer) (string, error) {
+	tags = append(tags, tag.Tag{Name: "Data-Protocol", Value: "ao"})
+	tags = append(tags, tag.Tag{Name: "Variant", Value: "ao.TN.1"})
+	tags = append(tags, tag.Tag{Name: "Type", Value: "Message"})
+	tags = append(tags, tag.Tag{Name: "SDK", Value: SDK})
 
-	dataItem, err := tx.NewDataItem([]byte(data), process, anchor, tags)
-	if err != nil {
-		return "", err
-	}
-
-	err = s.SignDataItem(dataItem)
+	dataItem := data_item.New([]byte(data), process, anchor, tags)
+	err := dataItem.Sign(s)
 	if err != nil {
 		return "", err
 	}
@@ -87,23 +80,19 @@ func (mu *MU) SendMessage(process string, data string, tags []types.Tag, anchor 
 	return res.ID, nil
 }
 
-func (mu *MU) SpawnProcess(module string, data string, tags []types.Tag, s *signer.Signer) (string, error) {
+func (mu *MU) SpawnProcess(module string, data string, tags []tag.Tag, s *signer.Signer) (string, error) {
 	if data == "" {
 		data = "1984"
 	}
-	tags = append(tags, types.Tag{Name: "Data-Protocol", Value: "ao"})
-	tags = append(tags, types.Tag{Name: "Variant", Value: "ao.TN.1"})
-	tags = append(tags, types.Tag{Name: "Type", Value: "Process"})
-	tags = append(tags, types.Tag{Name: "Scheduler", Value: SCHEDULER})
-	tags = append(tags, types.Tag{Name: "Module", Value: module})
-	tags = append(tags, types.Tag{Name: "SDK", Value: SDK})
+	tags = append(tags, tag.Tag{Name: "Data-Protocol", Value: "ao"})
+	tags = append(tags, tag.Tag{Name: "Variant", Value: "ao.TN.1"})
+	tags = append(tags, tag.Tag{Name: "Type", Value: "Process"})
+	tags = append(tags, tag.Tag{Name: "Scheduler", Value: SCHEDULER})
+	tags = append(tags, tag.Tag{Name: "Module", Value: module})
+	tags = append(tags, tag.Tag{Name: "SDK", Value: SDK})
 
-	dataItem, err := tx.NewDataItem([]byte(data), "", "", tags)
-	if err != nil {
-		return "", err
-	}
-
-	err = s.SignDataItem(dataItem)
+	dataItem := data_item.New([]byte(data), "", "", tags)
+	err := dataItem.Sign(s)
 	if err != nil {
 		return "", err
 	}
@@ -132,8 +121,4 @@ func (mu *MU) SpawnProcess(module string, data string, tags []types.Tag, s *sign
 	}
 
 	return res.ID, nil
-}
-
-func (mu *MU) Monitor() {
-	// optionally, monitoring logic...
 }
