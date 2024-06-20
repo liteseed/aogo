@@ -39,11 +39,11 @@ type SpawnProcessResponse struct {
 	ID string `json:"id"`
 }
 
-func (mu *MU) SendMessage(process string, data string, tags []tag.Tag, anchor string, s *signer.Signer) (string, error) {
-	tags = append(tags, tag.Tag{Name: "Data-Protocol", Value: "ao"})
-	tags = append(tags, tag.Tag{Name: "Variant", Value: "ao.TN.1"})
-	tags = append(tags, tag.Tag{Name: "Type", Value: "Message"})
-	tags = append(tags, tag.Tag{Name: "SDK", Value: SDK})
+func (mu *MU) SendMessage(process string, data string, tags *[]tag.Tag, anchor string, s *signer.Signer) (string, error) {
+	*tags = append(*tags, tag.Tag{Name: "Data-Protocol", Value: "ao"})
+	*tags = append(*tags, tag.Tag{Name: "Variant", Value: "ao.TN.1"})
+	*tags = append(*tags, tag.Tag{Name: "Type", Value: "Message"})
+	*tags = append(*tags, tag.Tag{Name: "SDK", Value: SDK})
 
 	dataItem := data_item.New([]byte(data), process, anchor, tags)
 	err := dataItem.Sign(s)
@@ -80,16 +80,16 @@ func (mu *MU) SendMessage(process string, data string, tags []tag.Tag, anchor st
 	return res.ID, nil
 }
 
-func (mu *MU) SpawnProcess(module string, data string, tags []tag.Tag, s *signer.Signer) (string, error) {
+func (mu *MU) SpawnProcess(module string, data string, tags *[]tag.Tag, s *signer.Signer) (string, error) {
 	if data == "" {
 		data = "1984"
 	}
-	tags = append(tags, tag.Tag{Name: "Data-Protocol", Value: "ao"})
-	tags = append(tags, tag.Tag{Name: "Variant", Value: "ao.TN.1"})
-	tags = append(tags, tag.Tag{Name: "Type", Value: "Process"})
-	tags = append(tags, tag.Tag{Name: "Scheduler", Value: SCHEDULER})
-	tags = append(tags, tag.Tag{Name: "Module", Value: module})
-	tags = append(tags, tag.Tag{Name: "SDK", Value: SDK})
+	*tags = append(*tags, tag.Tag{Name: "Data-Protocol", Value: "ao"})
+	*tags = append(*tags, tag.Tag{Name: "Variant", Value: "ao.TN.1"})
+	*tags = append(*tags, tag.Tag{Name: "Type", Value: "Process"})
+	*tags = append(*tags, tag.Tag{Name: "Scheduler", Value: SCHEDULER})
+	*tags = append(*tags, tag.Tag{Name: "Module", Value: module})
+	*tags = append(*tags, tag.Tag{Name: "SDK", Value: SDK})
 
 	dataItem := data_item.New([]byte(data), "", "", tags)
 	err := dataItem.Sign(s)

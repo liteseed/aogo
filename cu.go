@@ -52,14 +52,12 @@ func (cu *CU) LoadResult(process string, message string) (*Response, error) {
 }
 
 func (cu *CU) DryRun(message Message) (*Response, error) {
-	message.Tags = append(
-		message.Tags,
-		[]tag.Tag{{Name: "Data-Protocol", Value: "ao"}, {Name: "Type", Value: "Message"}, {Name: "Variant", Value: "ao.TN.1"}}...,
-	)
-
+	*message.Tags = append(*message.Tags, []tag.Tag{{Name: "Data-Protocol", Value: "ao"}, {Name: "Type", Value: "Message"}, {Name: "Variant", Value: "ao.TN.1"}}...)
+	
 	if message.Data == "" {
 		message.Data = "1984"
 	}
+
 	body, err := json.Marshal(message)
 	if err != nil {
 		return nil, err

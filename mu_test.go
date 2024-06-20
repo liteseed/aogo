@@ -22,7 +22,7 @@ func TestSendMessage(t *testing.T) {
 	t.Run("0", func(t *testing.T) {
 		process := "yugMfaR-u_11GkAuZhqeChPuzoxVYuJW8RnNCIby-D8"
 		data := ""
-		tags := []tag.Tag{{Name: "Action", Value: "Stakers"}}
+		tags := &[]tag.Tag{{Name: "Action", Value: "Stakers"}}
 
 		s, err := signer.FromPath("./keys/wallet.json")
 		assert.NoError(t, err)
@@ -73,7 +73,7 @@ func TestSpawnProcess(t *testing.T) {
 		mu := NewMUMock(muServer.URL)
 
 		data := ""
-		tags := []tag.Tag{{Name: "Action", Value: "Stakers"}}
+		tags := &[]tag.Tag{{Name: "Action", Value: "Stakers"}}
 
 		s, err := signer.FromPath("./keys/wallet.json")
 		assert.NoError(t, err)

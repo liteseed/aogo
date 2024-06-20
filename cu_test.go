@@ -108,7 +108,7 @@ func TestDryRun(t *testing.T) {
 		Target: "testTarget",
 		Owner:  "testOwner",
 		Data:   "testData",
-		Tags:   []tag.Tag{},
+		Tags:   &[]tag.Tag{},
 	}
 	resp, err := ao.DryRun(m)
 	assert.NoError(t, err)

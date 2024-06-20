@@ -20,11 +20,11 @@ type AO struct {
 }
 
 type Message struct {
-	ID     string      `json:"Id"`
-	Target string      `json:"Target"`
-	Owner  string      `json:"Owner"`
-	Data   any         `json:"Data"`
-	Tags   []tag.Tag `json:"Tags"`
+	ID     string     `json:"Id"`
+	Target string     `json:"Target"`
+	Owner  string     `json:"Owner"`
+	Data   any        `json:"Data"`
+	Tags   *[]tag.Tag `json:"Tags"`
 }
 
 func New(options ...func(*AO)) (*AO, error) {
@@ -49,11 +49,11 @@ func WthCU(url string) func(*AO) {
 
 // MU Functions
 
-func (ao *AO) SpawnProcess(module string, data string, tags []tag.Tag, s *signer.Signer) (string, error) {
+func (ao *AO) SpawnProcess(module string, data string, tags *[]tag.Tag, s *signer.Signer) (string, error) {
 	return ao.mu.SpawnProcess(module, data, tags, s)
 }
 
-func (ao *AO) SendMessage(process string, data string, tags []tag.Tag, anchor string, s *signer.Signer) (string, error) {
+func (ao *AO) SendMessage(process string, data string, tags *[]tag.Tag, anchor string, s *signer.Signer) (string, error) {
 	return ao.mu.SendMessage(process, data, tags, anchor, s)
 }
 
