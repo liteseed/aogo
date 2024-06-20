@@ -31,7 +31,7 @@ func TestSpawnProcess_AO(t *testing.T) {
 		ao := NewAOMock("", muServer.URL)
 
 		data := "test data"
-		tags := []tag.Tag{{Name: "TestTag", Value: "TestValue"}}
+		tags := &[]tag.Tag{{Name: "TestTag", Value: "TestValue"}}
 
 		s, err := signer.FromPath("./keys/wallet.json")
 		assert.NoError(t, err)
@@ -98,7 +98,7 @@ func TestSendMessage_AO(t *testing.T) {
 
 		process := "testProcess"
 		data := "testData"
-		tags := []tag.Tag{{Name: "TestTag", Value: "TestValue"}}
+		tags := &[]tag.Tag{{Name: "TestTag", Value: "TestValue"}}
 
 		s, err := signer.FromPath("./keys/wallet.json")
 		assert.NoError(t, err)
@@ -218,7 +218,7 @@ func TestDryRun_AO(t *testing.T) {
 			Target: "testTarget",
 			Owner:  "testOwner",
 			Data:   "testData",
-			Tags:   []tag.Tag{},
+			Tags:   &[]tag.Tag{},
 		}
 
 		resp, err := ao.DryRun(message)
@@ -243,7 +243,7 @@ func TestDryRun_AO(t *testing.T) {
 			Target: "testTarget",
 			Owner:  "testOwner",
 			Data:   "",
-			Tags:   []tag.Tag{},
+			Tags:   &[]tag.Tag{},
 		}
 
 		resp, err := ao.DryRun(message)
@@ -268,7 +268,7 @@ func TestDryRun_AO(t *testing.T) {
 			Target: "",
 			Owner:  "",
 			Data:   "",
-			Tags:   []tag.Tag{},
+			Tags:   &[]tag.Tag{},
 		}
 
 		_, err := ao.DryRun(message)
@@ -289,7 +289,7 @@ func TestDryRun_AO(t *testing.T) {
 			Target: "testTarget",
 			Owner:  "testOwner",
 			Data:   "testData",
-			Tags:   []tag.Tag{},
+			Tags:   &[]tag.Tag{},
 		}
 
 		_, err := ao.DryRun(message)
