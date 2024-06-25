@@ -3,7 +3,7 @@ module github.com/liteseed/aogo
 go 1.22.1
 
 require (
-	github.com/liteseed/goar v0.2.0
+	github.com/liteseed/goar v0.2.1
 	github.com/stretchr/testify v1.9.0
 )
 
