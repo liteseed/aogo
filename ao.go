@@ -6,8 +6,8 @@ import (
 )
 
 const (
-	MU_URL    = "https://mu.ao-testnet.xyz"
-	CU_URL    = "https://cu.ao-testnet.xyz"
+	MuUrl     = "https://mu.ao-testnet.xyz"
+	CuUrl     = "https://cu.ao-testnet.xyz"
 	SCHEDULER = "_GQ33BkPtZrqxA84vM8Zk-N2aO0toNNu_C-l-rawrBA"
 	GATEWAY   = "https://arweave.net"
 
@@ -28,7 +28,7 @@ type Message struct {
 }
 
 func New(options ...func(*AO)) (*AO, error) {
-	ao := &AO{cu: newCU(CU_URL), mu: newMU(MU_URL)}
+	ao := &AO{cu: newCU(CuUrl), mu: newMU(MuUrl)}
 	for _, o := range options {
 		o(ao)
 	}
