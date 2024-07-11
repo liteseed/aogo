@@ -51,10 +51,10 @@ func TestSendMessage(t *testing.T) {
 
 		ao := &AO{mu: newMU(muServer.URL)}
 
-		signer, err := signer.FromPath("./keys/wallet.json") // Mock signer or use a real one for the test
+		s, err := signer.FromPath("./keys/wallet.json") // Mock signer or use a real one for the test
 		assert.NoError(t, err)
 
-		id, err := ao.SendMessage("process", "data", nil, "", signer)
+		id, err := ao.SendMessage("process", "data", nil, "", s)
 		assert.NoError(t, err)
 		assert.Equal(t, "mockMessageID", id)
 	})
