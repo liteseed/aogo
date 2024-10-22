@@ -3,7 +3,7 @@ package aogo
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
+	"fmt"
 	"io"
 	"net/http"
 
@@ -40,10 +40,13 @@ type SpawnProcessResponse struct {
 }
 
 func (mu *MU) SendMessage(process string, data string, tags *[]tag.Tag, anchor string, s *signer.Signer) (string, error) {
-	*tags = append(*tags, tag.Tag{Name: "Data-Protocol", Value: "ao"})
-	*tags = append(*tags, tag.Tag{Name: "Variant", Value: "ao.TN.1"})
-	*tags = append(*tags, tag.Tag{Name: "Type", Value: "Message"})
-	*tags = append(*tags, tag.Tag{Name: "SDK", Value: SDK})
+	if tags == nil {
+		tags = &[]tag.Tag{}
+	}
+	*tags = append(*tags, tag.Tag{Name: "Data-Protocol", Value: "ao"},
+		tag.Tag{Name: "Variant", Value: "ao.TN.1"},
+		tag.Tag{Name: "Type", Value: "Message"},
+		tag.Tag{Name: "SDK", Value: SDK})
 
 	dataItem := data_item.New([]byte(data), process, anchor, tags)
 	err := dataItem.Sign(s)
@@ -62,9 +65,10 @@ func (mu *MU) SendMessage(process string, data string, tags *[]tag.Tag, anchor s
 	if err != nil {
 		return "", err
 	}
+	defer resp.Body.Close()
 
-	if resp.StatusCode >= 400 {
-		return "", errors.New("message failed: " + resp.Status)
+	if resp.StatusCode >= http.StatusBadRequest {
+		return "", fmt.Errorf("message failed: %s", resp.Status)
 	}
 
 	b, err := io.ReadAll(resp.Body)
@@ -74,7 +78,7 @@ func (mu *MU) SendMessage(process string, data string, tags *[]tag.Tag, anchor s
 	var res SendMessageResponse
 	err = json.Unmarshal(b, &res)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to unmarshal response: %v", err)
 	}
 
 	return res.ID, nil
@@ -84,12 +88,15 @@ func (mu *MU) SpawnProcess(module string, data string, tags *[]tag.Tag, s *signe
 	if data == "" {
 		data = "1984"
 	}
-	*tags = append(*tags, tag.Tag{Name: "Data-Protocol", Value: "ao"})
-	*tags = append(*tags, tag.Tag{Name: "Variant", Value: "ao.TN.1"})
-	*tags = append(*tags, tag.Tag{Name: "Type", Value: "Process"})
-	*tags = append(*tags, tag.Tag{Name: "Scheduler", Value: SCHEDULER})
-	*tags = append(*tags, tag.Tag{Name: "Module", Value: module})
-	*tags = append(*tags, tag.Tag{Name: "SDK", Value: SDK})
+	if tags == nil {
+		tags = &[]tag.Tag{}
+	}
+	*tags = append(*tags, tag.Tag{Name: "Data-Protocol", Value: "ao"},
+		tag.Tag{Name: "Variant", Value: "ao.TN.1"},
+		tag.Tag{Name: "Type", Value: "Process"},
+		tag.Tag{Name: "Scheduler", Value: SCHEDULER},
+		tag.Tag{Name: "Module", Value: module},
+		tag.Tag{Name: "SDK", Value: SDK})
 
 	dataItem := data_item.New([]byte(data), "", "", tags)
 	err := dataItem.Sign(s)
@@ -107,8 +114,9 @@ func (mu *MU) SpawnProcess(module string, data string, tags *[]tag.Tag, s *signe
 	if err != nil {
 		return "", err
 	}
-	if resp.StatusCode >= 400 {
-		return "", errors.New(resp.Status)
+	defer resp.Body.Close()
+	if resp.StatusCode >= http.StatusBadRequest {
+		return "", fmt.Errorf("request failed: %s", resp.Status)
 	}
 	b, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -117,7 +125,7 @@ func (mu *MU) SpawnProcess(module string, data string, tags *[]tag.Tag, s *signe
 	var res SpawnProcessResponse
 	err = json.Unmarshal(b, &res)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to unmarshal response: %v", err)
 	}
 
 	return res.ID, nil
