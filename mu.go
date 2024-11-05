@@ -84,21 +84,24 @@ func (mu *MU) SendMessage(process string, data string, tags *[]tag.Tag, anchor s
 	return res.ID, nil
 }
 
-func (mu *MU) SpawnProcess(module string, data string, tags *[]tag.Tag, s *signer.Signer) (string, error) {
+func (mu *MU) SpawnProcess(module string, data string, tags []tag.Tag, s *signer.Signer) (string, error) {
 	if data == "" {
 		data = "1984"
 	}
-	if tags == nil {
-		tags = &[]tag.Tag{}
-	}
-	*tags = append(*tags, tag.Tag{Name: "Data-Protocol", Value: "ao"},
-		tag.Tag{Name: "Variant", Value: "ao.TN.1"},
-		tag.Tag{Name: "Type", Value: "Process"},
-		tag.Tag{Name: "Scheduler", Value: SCHEDULER},
-		tag.Tag{Name: "Module", Value: module},
-		tag.Tag{Name: "SDK", Value: SDK})
 
-	dataItem := data_item.New([]byte(data), "", "", tags)
+	// Initialize newTags with the base tags
+	newTags := []tag.Tag{
+		{Name: "Data-Protocol", Value: "ao"},
+		{Name: "Variant", Value: "ao.TN.1"},
+		{Name: "Type", Value: "Process"},
+		{Name: "Scheduler", Value: SCHEDULER},
+		{Name: "Module", Value: module},
+		{Name: "SDK", Value: SDK},
+	}
+
+	newTags = append(newTags, tags...)
+
+	dataItem := data_item.New([]byte(data), "", "", &newTags)
 	err := dataItem.Sign(s)
 	if err != nil {
 		return "", err
@@ -115,12 +118,12 @@ func (mu *MU) SpawnProcess(module string, data string, tags *[]tag.Tag, s *signe
 		return "", err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= http.StatusBadRequest {
-		return "", fmt.Errorf("request failed: %s", resp.Status)
-	}
 	b, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
+	}
+	if resp.StatusCode >= http.StatusBadRequest {
+		return "", fmt.Errorf("request failed: %s", resp.Status)
 	}
 	var res SpawnProcessResponse
 	err = json.Unmarshal(b, &res)
