@@ -1,10 +1,9 @@
 package aogo
 
 import (
-	"testing"
-
 	"net/http"
 	"net/http/httptest"
+	"testing"
 
 	"github.com/liteseed/goar/signer"
 	"github.com/liteseed/goar/tag"
@@ -72,13 +71,12 @@ func TestSpawnProcess(t *testing.T) {
 
 		mu := NewMUMock(muServer.URL)
 
-		data := ""
-		tags := &[]tag.Tag{{Name: "Action", Value: "Stakers"}}
+		tags := []tag.Tag{{Name: "Action", Value: "Stakers"}}
 
 		s, err := signer.FromPath("./keys/wallet.json")
 		assert.NoError(t, err)
 
-		res, err := mu.SpawnProcess("", data, tags, s)
+		res, err := mu.SpawnProcess("", nil, tags, s)
 
 		assert.NoError(t, err)
 		assert.True(t, res != "")
@@ -98,7 +96,7 @@ func TestSpawnProcess(t *testing.T) {
 		signer, err := signer.FromPath("./keys/wallet.json") // Mock signer or use a real one for the test
 		assert.NoError(t, err)
 
-		id, err := ao.SpawnProcess("module", "data", nil, signer)
+		id, err := ao.SpawnProcess("module", []byte("data"), nil, signer)
 		assert.NoError(t, err)
 		assert.Equal(t, "mockProcessID", id)
 	})

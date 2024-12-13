@@ -49,7 +49,7 @@ func WthCU(url string) func(*AO) {
 
 // MU Functions
 
-func (ao *AO) SpawnProcess(module string, data string, tags []tag.Tag, s *signer.Signer) (string, error) {
+func (ao *AO) SpawnProcess(module string, data []byte, tags []tag.Tag, s *signer.Signer) (string, error) {
 	return ao.mu.SpawnProcess(module, data, tags, s)
 }
 

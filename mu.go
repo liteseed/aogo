@@ -84,9 +84,9 @@ func (mu *MU) SendMessage(process string, data string, tags *[]tag.Tag, anchor s
 	return res.ID, nil
 }
 
-func (mu *MU) SpawnProcess(module string, data string, tags []tag.Tag, s *signer.Signer) (string, error) {
-	if data == "" {
-		data = "1984"
+func (mu *MU) SpawnProcess(module string, data []byte, tags []tag.Tag, s *signer.Signer) (string, error) {
+	if data == nil {
+		data = []byte("1984")
 	}
 
 	// Initialize newTags with the base tags
@@ -101,7 +101,7 @@ func (mu *MU) SpawnProcess(module string, data string, tags []tag.Tag, s *signer
 
 	newTags = append(newTags, tags...)
 
-	dataItem := data_item.New([]byte(data), "", "", &newTags)
+	dataItem := data_item.New(data, "", "", &newTags)
 	err := dataItem.Sign(s)
 	if err != nil {
 		return "", err

@@ -45,8 +45,8 @@ func TestSpawnProcess_AO(t *testing.T) {
 		})
 
 		ao := NewAOMock("", muServer.URL)
-		data := "test data"
-		tags := &[]tag.Tag{{Name: "TestTag", Value: "TestValue"}}
+		data := []byte("test data")
+		tags := []tag.Tag{{Name: "TestTag", Value: "TestValue"}}
 		s := setupSigner(t)
 
 		id, err := ao.SpawnProcess("testModule", data, tags, s)
@@ -65,7 +65,7 @@ func TestSpawnProcess_AO(t *testing.T) {
 		ao := NewAOMock("", muServer.URL)
 		s := setupSigner(t)
 
-		id, err := ao.SpawnProcess("testModule", "", nil, s)
+		id, err := ao.SpawnProcess("testModule", nil, nil, s)
 		assert.NoError(t, err)
 		assert.Equal(t, "mockProcessID", id)
 	})
@@ -73,7 +73,7 @@ func TestSpawnProcess_AO(t *testing.T) {
 	t.Run("InvalidSigner", func(t *testing.T) {
 		ao := NewAOMock("", "")
 
-		_, err := ao.SpawnProcess("testModule", "testData", nil, nil)
+		_, err := ao.SpawnProcess("testModule", []byte("testData"), nil, nil)
 		assert.Error(t, err)
 	})
 
@@ -86,7 +86,7 @@ func TestSpawnProcess_AO(t *testing.T) {
 		ao := NewAOMock("", muServer.URL)
 		s := setupSigner(t)
 
-		_, err := ao.SpawnProcess("testModule", "testData", nil, s)
+		_, err := ao.SpawnProcess("testModule", []byte("testData"), nil, s)
 		assert.Error(t, err)
 	})
 }
